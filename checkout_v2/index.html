@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="version" content="3.2.0" />
+<meta name="version" content="3.3.0" />
 <meta name="last-updated" content="2026-04-21" />
 <title>Checkout — Jaycar Electronics</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -30,7 +30,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.45}
 a{text-decoration:none;color:inherit}
-button,input,select{font:inherit}
+button,input,select,textarea{font-family:var(--font)!important} html,body,*{font-family:var(--font)}
 .site-header{height:68px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .site-header img.logo{height:30px}
 .header-icons{display:flex;gap:24px;color:#fff;font-size:10px;font-weight:600;align-items:center}
@@ -43,8 +43,8 @@ button,input,select{font:inherit}
 .p-step.active .p-num{background:var(--orange);border-color:var(--orange);color:var(--navy)}
 .p-step.done .p-num{background:var(--teal);border-color:var(--teal);color:var(--navy)}
 .p-div{width:24px;height:1px;background:rgba(255,255,255,.18)}
-.checkout-wrap{max-width:1500px;margin:0 auto;padding:24px 24px 40px}
-.checkout-grid{display:grid;grid-template-columns:1.05fr 1fr .9fr;gap:24px;align-items:start}
+.checkout-wrap{max-width:1560px;margin:0 auto;padding:24px 12px 40px}
+.checkout-grid{display:grid;grid-template-columns:1.22fr .95fr .83fr;gap:20px;align-items:start}
 .checkout-title{font-size:18px;font-weight:800;margin-bottom:16px;color:var(--navy)}
 .small-note{font-size:12px;color:var(--muted);margin-bottom:16px}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
@@ -67,7 +67,7 @@ button,input,select{font:inherit}
 .review-alert{margin-bottom:14px;background:#fff7ef;border:1px solid rgba(241,136,5,.25);border-left:4px solid var(--orange);padding:12px 14px;border-radius:4px}
 .review-alert strong{display:block;font-size:13px;color:#6f4304;margin-bottom:3px}.review-alert span{font-size:12px;color:#6c7280}
 .toggle{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
-.toggle button{height:40px;border:none;background:#f7f9fb;font-weight:800;font-size:12px;color:#69788c;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.toggle button{height:40px;border:none;background:#f7f9fb;font-weight:800;font-size:12px;color:#69788c;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}.inline-actions{justify-content:center}.account-actions{display:flex;gap:8px;flex-wrap:wrap}.account-actions .btn{flex:1 1 140px}.bag-remove-btn{background:none;border:none;padding:0;color:#243042;font-weight:700;cursor:pointer}.bag-remove-btn:hover{text-decoration:underline}
 .toggle button.active{background:#fff;color:var(--navy);box-shadow:inset 0 -3px 0 var(--teal)}
 .form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-group{margin-bottom:12px}.form-group:last-child{margin-bottom:0}
 .form-label{display:block;font-size:12px;font-weight:800;color:#202c3d;margin-bottom:6px}.form-label .opt{font-weight:500;color:var(--muted)}
@@ -148,9 +148,9 @@ button,input,select{font:inherit}
       <div class="small-note">Items in your bag will only be reserved after the order is placed.</div>
       <div class="section"><div class="bag-card-head"><h3 style="margin-bottom:0">Fulfilment review</h3><span class="badge badge-orange">1 item needs review</span></div><div class="review-alert"><strong>Basket needs attention</strong><span>Your clearance speaker may not be available for every delivery address. Review the address below or switch to Click &amp; Collect.</span></div></div>
       <div class="panel panel-pad">
-        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/SB2486%202.png" alt="XC5262"></div><div><div class="bag-name">2in1 Portable Split Wireless Speakers 10W</div><div class="bag-sub">XC5262</div><div class="bag-price">$44.95</div><div class="bag-meta">Clearance item · Delivery availability can vary by address</div><div class="bag-links"><span>Move to Wishlist</span><span>Remove</span></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div><div class="low-stock">ⓘ Limited fulfilment availability</div></div></div>
-        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/TL6412_elegoo-pla-filament-space-grey-1-75mm-1kg_161650.webp" alt="NS3005"></div><div><div class="bag-name">0.71mm Duratech Solder 200gm</div><div class="bag-sub">NS3005</div><div class="bag-price">$29.95</div><div class="bag-meta">Standard stocked line</div><div class="bag-links"><span>Move to Wishlist</span><span>Remove</span></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div></div></div>
-        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/MB3866_5000mah-magnetic-wireless-charging-power-bank_158002.webp" alt="MB3866"></div><div><div class="bag-name">5000mAh Magnetic Wireless Power Bank</div><div class="bag-sub">MB3866</div><div class="bag-price">$39.95</div><div class="bag-meta">Battery item</div><div class="bag-links"><span>Move to Wishlist</span><span>Remove</span></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div></div></div>
+        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/SB2486%202.png" alt="XC5262"></div><div><div class="bag-name">2in1 Portable Split Wireless Speakers 10W</div><div class="bag-sub">XC5262</div><div class="bag-price">$44.95</div><div class="bag-meta">Clearance item · Delivery availability can vary by address</div><div class="bag-links"><span>Move to Wishlist</span><button class="bag-remove-btn" type="button" onclick="removeProduct('XC5262')">Remove</button></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div><div class="low-stock">ⓘ Limited fulfilment availability</div></div></div>
+        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/TL6412_elegoo-pla-filament-space-grey-1-75mm-1kg_161650.webp" alt="NS3005"></div><div><div class="bag-name">0.71mm Duratech Solder 200gm</div><div class="bag-sub">NS3005</div><div class="bag-price">$29.95</div><div class="bag-meta">Standard stocked line</div><div class="bag-links"><span>Move to Wishlist</span><button class="bag-remove-btn" type="button" onclick="removeProduct('NS3005')">Remove</button></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div></div></div>
+        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/MB3866_5000mah-magnetic-wireless-charging-power-bank_158002.webp" alt="MB3866"></div><div><div class="bag-name">5000mAh Magnetic Wireless Power Bank</div><div class="bag-sub">MB3866</div><div class="bag-price">$39.95</div><div class="bag-meta">Battery item</div><div class="bag-links"><span>Move to Wishlist</span><button class="bag-remove-btn" type="button" onclick="removeProduct('MB3866')">Remove</button></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div></div></div>
       </div>
     </section>
     <section class="checkout-col delivery-mode" id="checkout-mode-root">
@@ -158,10 +158,10 @@ button,input,select{font:inherit}
       <div class="section">
         <h3>Shipping address</h3>
         <div class="panel">
-          <div class="toggle"><button id="tab-delivery" class="active" onclick="switchFulfilment('delivery')">Delivery</button><button id="tab-collect" onclick="switchFulfilment('collect')">Collection point</button></div>
+          <div class="toggle"><button id="tab-delivery" class="active" onclick="switchFulfilment('delivery')">Delivery</button><button id="tab-collect" onclick="switchFulfilment('collect')">Click &amp; Collect</button></div>
           <div class="panel-pad">
-            <div class="account-strip"><div><strong>Signed in as rezorzo@gmail.com</strong><br><span>Saved details and address book available</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-navy" type="button">Manage account</button><button class="btn btn-ghost" type="button">Guest checkout</button></div></div>
-            <div class="delivery-only" id="saved-address-section"><div class="form-label" style="margin-bottom:8px">Saved addresses</div><div class="inline-alert" id="address-alert"><strong>This address can’t receive 1 clearance item in your basket.</strong>Choose another saved address, switch to Click &amp; Collect, or remove the affected item.<div class="inline-actions"><button class="btn btn-navy" type="button" onclick="switchFulfilment('collect')">Switch to Click &amp; Collect</button><button class="btn btn-ghost" type="button">Remove affected item</button></div></div><div class="saved-addresses" id="saved-addresses"></div><button class="btn btn-ghost" type="button">+ Add new address</button><div style="height:12px"></div></div>
+            <div class="account-strip"><div><strong id="account-title">Guest checkout</strong><br><span id="account-sub">Continue as guest or log in to use saved details and address book.</span></div><div class="account-actions"><button class="btn btn-navy" id="login-btn" type="button" onclick="toggleLoginState()">Log in</button><button class="btn btn-ghost" id="guest-btn" type="button" onclick="setGuestState()">Guest checkout</button><button class="btn btn-navy" id="manage-btn" type="button" onclick="setLoggedInState()" style="display:none;">Manage account</button></div></div>
+            <div class="delivery-only" id="saved-address-section" style="display:none;"><div class="form-label" style="margin-bottom:8px">Saved addresses</div><div class="inline-alert" id="address-alert"><strong id="address-alert-title">This address can’t receive 1 item in your basket.</strong><span id="address-alert-copy">Choose another saved address, switch to Click &amp; Collect, or remove the affected item.</span><div class="inline-actions"><button class="btn btn-navy" type="button" onclick="switchFulfilment('collect')">Switch to Click &amp; Collect</button><button class="btn btn-ghost" type="button" onclick="removeAffectedItems()">Remove affected item</button></div></div><div class="saved-addresses" id="saved-addresses"></div><button class="btn btn-ghost" type="button">+ Add new address</button><div style="height:12px"></div></div>
             <div class="form-grid-2"><div class="form-group"><label class="form-label">First name *</label><input class="input" id="first-name" value="Riccardo"></div><div class="form-group"><label class="form-label">Last name *</label><input class="input" id="last-name" value="Zorzo"></div></div>
             <div class="form-group delivery-only"><label class="form-label">Business name <span class="opt">optional</span></label><input class="input" placeholder=""></div>
             <div class="form-group delivery-only"><label class="form-label">Shipping address *</label><input class="input" id="shipping-address" value="45 Pearl St, Newtown, NSW 2042"></div>
@@ -220,17 +220,22 @@ button,input,select{font:inherit}
   </div>
 </div>
 <script>
-const state={fulfilment:'delivery',service:'standard',selectedAddressId:'home',subtotal:114.85,addresses:[{id:'home',label:'Home',line:'45 Pearl St, Newtown, NSW 2042',phone:'0434491006',valid:false},{id:'work',label:'Work',line:'12 Foundry Rd, Wetherill Park, NSW 2164',phone:'0434491006',valid:true},{id:'parents',label:'Parents',line:'88 Sample Ave, Blacktown, NSW 2148',phone:'0400000000',valid:true}]};
+const state={fulfilment:'delivery',service:'standard',selectedAddressId:'home',subtotal:114.85,loggedIn:false,items:[{sku:'XC5262',name:'2in1 Portable Split Wireless Speakers 10W',price:44.95,affected:true},{sku:'NS3005',name:'0.71mm Duratech Solder 200gm',price:29.95,affected:false},{sku:'MB3866',name:'5000mAh Magnetic Wireless Power Bank',price:39.95,affected:false}],addresses:[{id:'home',label:'Home',line:'45 Pearl St, Newtown, NSW 2042',phone:'0434491006',valid:false},{id:'work',label:'Work',line:'12 Foundry Rd, Wetherill Park, NSW 2164',phone:'0434491006',valid:true},{id:'parents',label:'Parents',line:'88 Sample Ave, Blacktown, NSW 2148',phone:'0400000000',valid:true}]};
 function money(v){return '$'+v.toFixed(2)}
 function currentAddress(){return state.addresses.find(a=>a.id===state.selectedAddressId)}
+function affectedCount(){return state.items.filter(i=>i.affected).length}
+function refreshSubtotal(){state.subtotal=state.items.reduce((sum,i)=>sum+i.price,0)}
+function setGuestState(){state.loggedIn=false;document.getElementById('account-title').textContent='Guest checkout';document.getElementById('account-sub').textContent='Continue as guest or log in to use saved details and address book.';document.getElementById('login-btn').style.display='';document.getElementById('guest-btn').style.display='';document.getElementById('manage-btn').style.display='none';document.getElementById('saved-address-section').style.display='none';revalidateAddress()}
+function setLoggedInState(){state.loggedIn=true;document.getElementById('account-title').textContent='Signed in as rezorzo@gmail.com';document.getElementById('account-sub').textContent='Saved details and address book available';document.getElementById('login-btn').style.display='none';document.getElementById('guest-btn').style.display='';document.getElementById('manage-btn').style.display='';document.getElementById('saved-address-section').style.display=state.fulfilment==='delivery'?'':'none';revalidateAddress()}
+function toggleLoginState(){setLoggedInState()}
 function renderAddresses(){document.getElementById('saved-addresses').innerHTML=state.addresses.map(a=>`<label class="addr-card ${a.id===state.selectedAddressId?'active':''}" onclick="selectAddress('${a.id}')"><input type="radio" name="saved-address" ${a.id===state.selectedAddressId?'checked':''}><div><div class="addr-title">${a.label}</div><div class="addr-copy">${a.line}<br>${a.phone}</div></div><div class="addr-tag">${a.valid?'Delivery available':'Review needed'}</div></label>`).join('')}
 function selectAddress(id){state.selectedAddressId=id;renderAddresses();updateAddressFields();revalidateAddress()}
 function updateAddressFields(){const a=currentAddress();document.getElementById('shipping-address').value=a.line;document.getElementById('mobile').value='+61'+a.phone.replace(/^0/,'')}
-function revalidateAddress(){const valid=currentAddress().valid;document.getElementById('address-alert').classList.toggle('show',state.fulfilment==='delivery'&&!valid);document.querySelectorAll('[data-service]').forEach(el=>{el.style.opacity=valid?'1':'.55';el.style.pointerEvents=valid?'auto':'none'});updateSummary()}
-function switchFulfilment(mode){state.fulfilment=mode;const root=document.getElementById('checkout-mode-root');root.classList.toggle('delivery-mode',mode==='delivery');root.classList.toggle('collect-mode',mode==='collect');document.getElementById('tab-delivery').classList.toggle('active',mode==='delivery');document.getElementById('tab-collect').classList.toggle('active',mode==='collect');updateSummary();revalidateAddress()}
+function revalidateAddress(){const valid=currentAddress().valid || affectedCount()===0 || !state.loggedIn;document.getElementById('address-alert').classList.toggle('show',state.fulfilment==='delivery'&&!valid&&state.loggedIn);const count=affectedCount();document.getElementById('address-alert-title').textContent=`This address can’t receive ${count} ${count===1?'item':'items'} in your basket.`;document.getElementById('address-alert-copy').textContent=`Choose another saved address, switch to Click & Collect, or remove the affected ${count===1?'item':'items'}.`;document.querySelectorAll('[data-service]').forEach(el=>{el.style.opacity=valid?'1':'.55';el.style.pointerEvents=valid?'auto':'none'});updateSummary()}
+function switchFulfilment(mode){state.fulfilment=mode;const root=document.getElementById('checkout-mode-root');root.classList.toggle('delivery-mode',mode==='delivery');root.classList.toggle('collect-mode',mode==='collect');document.getElementById('tab-delivery').classList.toggle('active',mode==='delivery');document.getElementById('tab-collect').classList.toggle('active',mode==='collect');document.getElementById('saved-address-section').style.display=(state.loggedIn&&mode==='delivery')?'':'none';updateSummary();revalidateAddress()}
 function selectShipService(service){state.service=service;document.querySelectorAll('[data-service]').forEach(el=>{const active=el.getAttribute('data-service')===service;el.classList.toggle('active',active);const radio=el.querySelector('input');if(radio)radio.checked=active});updateSummary()}
 function shippingCharge(){if(state.fulfilment==='collect')return 0;if(!currentAddress().valid)return null;if(state.service==='express')return 14.95;return state.subtotal>=149?0:9.95}
-function updateSummary(){const shipping=shippingCharge(),shipEl=document.getElementById('sum-shipping'),totalEl=document.getElementById('sum-total');if(shipping===null){shipEl.textContent='Address needs review';shipEl.style.color='#CF0B2A';totalEl.textContent='—'}else if(shipping===0){shipEl.textContent='FREE';shipEl.style.color='#1f9d55';totalEl.textContent=money(state.subtotal)}else{shipEl.textContent=money(shipping);shipEl.style.color='#1f2937';totalEl.textContent=money(state.subtotal+shipping)}const standardLabel=document.getElementById('standard-price-label');standardLabel.textContent=state.subtotal>=149?'FREE':'$9.95';standardLabel.classList.toggle('free',state.subtotal>=149)}
+function updateSummary(){refreshSubtotal();const shipping=shippingCharge(),shipEl=document.getElementById('sum-shipping'),totalEl=document.getElementById('sum-total');document.getElementById('sum-subtotal').textContent=money(state.subtotal);if(shipping===null){shipEl.textContent='Address needs review';shipEl.style.color='#CF0B2A';totalEl.textContent='—'}else if(shipping===0){shipEl.textContent='FREE';shipEl.style.color='#1f9d55';totalEl.textContent=money(state.subtotal)}else{shipEl.textContent=money(shipping);shipEl.style.color='#1f2937';totalEl.textContent=money(state.subtotal+shipping)}const standardLabel=document.getElementById('standard-price-label');standardLabel.textContent=state.subtotal>=149?'FREE':'$9.95';standardLabel.classList.toggle('free',state.subtotal>=149)}
 function selectPayment(key){
   document.querySelectorAll('.pay-tile').forEach(tile=>tile.classList.remove('active'));
   document.querySelectorAll('.pay-select-btn').forEach(btn=>btn.classList.remove('active'));
@@ -240,22 +245,20 @@ function selectPayment(key){
     if(radio) radio.checked=true;
     return;
   }
-  const map={
-    'gpay':'.pay-select-btn.gpay',
-    'paypal':'.pay-select-btn.paypal',
-    'afterpay':'.pay-select-btn.afterpay',
-    'zip':'.pay-select-btn.zip',
-    'latitude':'.pay-select-btn.latitude',
-    'gift-card':'.pay-select-btn.giftcard'
-  };
-  const el=document.querySelector(map[key]);
-  if(el){
-    el.classList.add('active');
-    const radio=el.querySelector('input[type="radio"]');
+  if(key==='saved-card'){
+    const tile=document.querySelector('.pay-tile.saved');
+    if(tile) tile.classList.add('active');
+    const radio=tile?.querySelector('input[type="radio"]');
     if(radio) radio.checked=true;
+    return;
   }
+  const map={'gpay':'.pay-select-btn.gpay','paypal':'.pay-select-btn.paypal','afterpay':'.pay-select-btn.afterpay','zip':'.pay-select-btn.zip','latitude':'.pay-select-btn.latitude','gift-card':'.pay-select-btn.giftcard'};
+  const el=document.querySelector(map[key]);
+  if(el){el.classList.add('active');const radio=el.querySelector('input[type="radio"]');if(radio) radio.checked=true;}
 }
-renderAddresses();updateAddressFields();switchFulfilment('delivery');selectShipService('standard');
+function removeProduct(sku){state.items=state.items.filter(i=>i.sku!==sku);document.querySelectorAll('.bag-item').forEach(row=>{const sub=row.querySelector('.bag-sub');if(sub&&sub.textContent.trim()===sku){row.remove();}});if(sku==='XC5262'){state.addresses=state.addresses.map(a=>({...a,valid:true}));}document.querySelector('.bag-col .checkout-title').textContent=`Bag (${state.items.length})`;const badge=document.querySelector('.badge.badge-orange');const count=affectedCount();if(badge){badge.textContent=count>0?`${count} ${count===1?'item':'items'} needs review`:'All items valid';}updateSummary();revalidateAddress();}
+function removeAffectedItems(){state.items.filter(i=>i.affected).forEach(i=>removeProduct(i.sku));}
+renderAddresses();updateAddressFields();setGuestState();switchFulfilment('delivery');selectShipService('standard');selectPayment('saved-card');
 </script>
 </body>
 </html>
