@@ -2,42 +2,58 @@
 =============================================================
   JAYCAR CHECKOUT — VERSION HISTORY
 =============================================================
+
   v1.0.0 | 2026-04-17 | Initial build
-    - Single-page checkout (no multi-step loading)
-    - Jaycar navy + orange branding
+    - Single-page checkout, Jaycar navy + orange branding
     - Express checkout: GPay, PayPal, Afterpay
-    - Contact, delivery address, shipping options, payment
-    - Tabbed payment: card, Zip, Latitude, gift card
-    - Card number auto-format + brand detection
-    - Live shipping cost updates on selection
-    - Sticky order summary sidebar
-    - Free shipping progress bar
-    - Mobile responsive (stacked layout < 768px)
-    - DM Sans + DM Mono typefaces
+    - Tabbed payment, card auto-format, live shipping totals
+    - Sticky order summary sidebar, free shipping progress bar
+    - Mobile responsive, DM Sans + DM Mono typefaces
 
   v1.1.0 | 2026-04-17 | Version control + tooltip
-    - Added version history comment block (this block)
-    - Added version tooltip on logo hover in header
-    - Added meta version tag for programmatic reads
-    - No functional checkout changes
+    - Version history comment block, meta version tag
+    - Hover tooltip on Jaycar logo showing version + changelog
 
   v1.2.0 | 2026-04-20 | Brand style guide applied
-    - Colours updated to exact brand HEX values:
-        Navy #0C254C, Orange #F68b22, Teal #56BFC9
-    - Approved colour combos enforced (orange-on-navy REMOVED)
-    - Typography: Nunito Sans (Avenir-equivalent via Google Fonts)
-    - JUST ASK jaycar logo lockup rebuilt to match brand assets
-    - Progress bar: teal bottom border + teal completed steps
-    - Active step indicator: navy text on orange (brand-approved)
-    - Shipping badge: teal bg + navy text (brand-approved)
-    - CTA button: orange bg + navy text (brand-approved)
-    - Confirm state: teal bg + navy text (brand-approved)
-    - Aside header: navy bg + white text + teal accent border
-    - Free shipping bar: teal fill + teal-tinted bg
-    - Block headers: navy bg + white title + teal action text
-    - Focus states: teal border + teal glow ring
-    - Version tooltip badge: teal bg + navy text
-    - Tech doc updated with v1.2.0 entry
+    - Exact brand HEX values applied, Nunito Sans typography
+    - Teal as interactive accent: focus rings, progress, badges
+
+  v2.0.0 | 2026-04-21 | Fulfilment-first checkout redesign
+    - Basket Status Block, delivery selector, issue card
+    - Progressive disclosure gate, inline state machine
+
+  v2.1.0 | 2026-04-21 | Design notes moved to version control
+    - Annotations panel removed from front end
+
+  v2.2.0 | 2026-04-21 | PDP nav/footer, Figtree, 4px radii, real logo
+    - Full PDP two-row nav + footer transplanted
+    - Figtree font, all radii 4px, Jaycar SVG logo
+
+  v2.3.0 | 2026-04-21 | Colour audit + header/nav simplification
+    - [CHANGED] All colours corrected to Jaycar Brand Guidelines 2018:
+        Navy    #0C254C  (primary — unchanged, was already correct)
+        Orange  #F18805  (primary — corrected from #F68b22 campaign colour)
+        Teal    #56BFCA  (secondary — corrected from #56BFC9)
+        Magenta #E5007D  (secondary — replaces non-brand greens/reds)
+        Sale Red #CF0B2A (secondary — replaces #c0392b non-brand red)
+        Gold    #F6C100  (secondary — replaces amber/yellow tints)
+        Cyan    #009FE3  (primary — replaces teal-bg tints)
+        Warm Grey #DCD7D4 (secondary — page background)
+    - [REMOVED] Nav bottom row (burger menu, Shop Products, nav links)
+    - [REMOVED] Search bar from header
+    - [KEPT]    Logo + version tooltip, Account/Lists/Cart icons,
+                Deliver To / Your Store store selectors
+    - [REVERTED] Progress bar back to v2.1 style (sticky under fixed header)
+    - [UPDATED]  body padding-top: 68px (single-row nav)
+    - Tech doc updated
+
+  DESIGN NOTES — v2.0.0
+  ---------------------------------------------------------------
+  1. Basket Status Block: issues surface before any form entry
+  2. Delivery method moved to step 1 (was step 3)
+  3. Item Issue Resolution card: plain-language outcome only
+  4. Progressive disclosure gate: contact + payment locked until resolved
+  5. Multi-step pagination removed: single-page inline transitions
 =============================================================
 -->
 <!DOCTYPE html>
@@ -45,920 +61,948 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="1.2.0">
-<meta name="last-updated" content="2026-04-20">
+<meta name="version" content="2.3.0">
+<meta name="last-updated" content="2026-04-21">
 <title>Checkout — Jaycar Electronics</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --navy:       #0C254C;
-    --navy-mid:   #112d5c;
-    --navy-light: #1a3d6e;
-    --orange:     #F68b22;
-    --orange-dk:  #d97510;
-    --teal:       #56BFC9;
-    --teal-dk:    #3da8b3;
-    --white:      #FFFFFF;
-    --off-white:  #f4f6f9;
-    --border:     #dde0e8;
-    --border-mid: #c5c9d6;
-    --txt-navy:   #0C254C;
-    --txt-mid:    #4a5568;
-    --txt-muted:  #8492a6;
-    --surface:    #ffffff;
-    --radius:     6px;
-    --radius-lg:  10px;
-  }
-
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Nunito Sans', sans-serif;
-    background: var(--off-white);
-    color: var(--txt-navy);
-    font-size: 15px;
-    line-height: 1.55;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  /* HEADER */
-  .site-header {
-    background: var(--navy);
-    padding: 0 2rem;
-    height: 62px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  /* LOGO */
-  .logo-wrap {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    cursor: default;
-    user-select: none;
-  }
-
-  .logo-lockup {
-    display: flex;
-    flex-direction: column;
-    line-height: 1;
-    gap: 1px;
-  }
-
-  .logo-just-ask {
-    font-size: 8.5px;
-    font-weight: 800;
-    letter-spacing: 0.2em;
-    color: var(--white);
-    text-transform: uppercase;
-    padding-left: 13px;
-  }
-
-  .logo-jaycar-row {
-    display: flex;
-    align-items: flex-start;
-  }
-
-  .logo-dot-mark {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--teal);
-    margin-top: 4px;
-    margin-right: 5px;
-    flex-shrink: 0;
-  }
-
-  .logo-jaycar-text {
-    font-size: 27px;
-    font-weight: 800;
-    color: var(--white);
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
-
-  /* VERSION TOOLTIP */
-  .version-tooltip {
-    position: absolute;
-    top: calc(100% + 14px);
-    left: 0;
-    background: var(--navy-light);
-    border: 0.5px solid rgba(255,255,255,0.12);
-    border-radius: var(--radius);
-    padding: 10px 14px;
-    min-width: 250px;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(-4px);
-    transition: opacity 0.18s ease, transform 0.18s ease;
-    z-index: 200;
-  }
-
-  .logo-wrap:hover .version-tooltip { opacity: 1; transform: translateY(0); }
-
-  .version-tooltip::before {
-    content: '';
-    position: absolute;
-    top: -5px;
-    left: 14px;
-    width: 8px;
-    height: 8px;
-    background: var(--navy-light);
-    border-left: 0.5px solid rgba(255,255,255,0.12);
-    border-top: 0.5px solid rgba(255,255,255,0.12);
-    transform: rotate(45deg);
-  }
-
-  .vt-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-    font-size: 12px;
-    margin-bottom: 5px;
-  }
-
-  .vt-row:last-child { margin-bottom: 0; }
-  .vt-label { color: rgba(255,255,255,0.42); white-space: nowrap; }
-  .vt-value { color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; }
-
-  .vt-badge {
-    background: var(--teal);
-    color: var(--navy);
-    font-size: 10px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-family: 'DM Mono', monospace;
-  }
-
-  .vt-divider { height: 0.5px; background: rgba(255,255,255,0.1); margin: 7px 0; }
-
-  .header-secure {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0.02em;
-  }
-
-  /* PROGRESS BAR */
-  .checkout-progress {
-    background: var(--navy-mid);
-    padding: 0 2rem;
-    display: flex;
-    align-items: center;
-    height: 46px;
-    border-bottom: 3px solid var(--teal);
-  }
-
-  .progress-step {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    font-weight: 800;
-    color: rgba(255,255,255,0.38);
-    white-space: nowrap;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-  }
-
-  .progress-step.active { color: var(--white); }
-  .progress-step.done   { color: var(--teal); }
-
-  .step-num {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    border: 1.5px solid currentColor;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    flex-shrink: 0;
-  }
-
-  .progress-step.done .step-num   { background: var(--teal); border-color: var(--teal); color: var(--navy); }
-  .progress-step.active .step-num { background: var(--orange); border-color: var(--orange); color: var(--navy); }
-
-  .progress-divider { width: 28px; height: 1px; background: rgba(255,255,255,0.18); margin: 0 10px; flex-shrink: 0; }
-
-  /* LAYOUT */
-  .checkout-layout {
-    max-width: 1100px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 375px;
-    align-items: start;
-  }
-
-  .checkout-main  { padding: 2rem 2.5rem 4rem 1.5rem; }
-  .checkout-aside { padding: 2rem 1.5rem 4rem 2rem; position: sticky; top: 108px; }
-
-  /* FORM BLOCKS */
-  .form-block {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    margin-bottom: 14px;
-    overflow: hidden;
-    transition: border-color 0.15s;
-    animation: fadeUp 0.3s ease both;
-  }
-
-  .form-block:nth-child(1) { animation-delay: 0.04s; }
-  .form-block:nth-child(2) { animation-delay: 0.08s; }
-  .form-block:nth-child(3) { animation-delay: 0.12s; }
-  .form-block:nth-child(4) { animation-delay: 0.16s; }
-  .form-block:focus-within { border-color: var(--teal); }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(7px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .block-header {
-    padding: 13px 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    background: var(--navy);
-  }
-
-  .block-title {
-    font-size: 10.5px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--white);
-  }
-
-  .block-action {
-    font-size: 12px;
-    color: var(--teal);
-    cursor: pointer;
-    font-weight: 700;
-    text-decoration: underline;
-    text-underline-offset: 2px;
-  }
-
-  .block-body { padding: 20px; }
-
-  /* EXPRESS */
-  .express-wrap { margin-bottom: 20px; }
-
-  .express-label {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    color: var(--txt-muted);
-    text-align: center;
-    margin-bottom: 12px;
-  }
-
-  .express-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-
-  .express-btn {
-    height: 48px;
-    border-radius: var(--radius);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: 1px solid var(--border);
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 800;
-    transition: opacity 0.15s, transform 0.1s;
-  }
-
-  .express-btn:hover  { opacity: 0.85; }
-  .express-btn:active { transform: scale(0.97); }
-
-  .btn-gpay     { background: #000; color: #fff; border-color: #000; letter-spacing: 0.04em; }
-  .btn-paypal   { background: #ffc439; color: #003087; border-color: #ffc439; font-size: 14px; font-style: italic; }
-  .btn-afterpay { background: #b2fce4; color: #000; border-color: #b2fce4; font-size: 12px; }
-
-  .or-divider {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 18px 0;
-    color: var(--txt-muted);
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-  }
-
-  .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
-
-  /* FORMS */
-  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .form-group { margin-bottom: 14px; }
-  .form-group:last-child { margin-bottom: 0; }
-
-  .form-label {
-    display: block;
-    font-size: 10.5px;
-    font-weight: 800;
-    color: var(--txt-navy);
-    margin-bottom: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.07em;
-  }
-
-  .form-input, .form-select {
-    width: 100%;
-    height: 44px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    padding: 0 12px;
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--txt-navy);
-    background: var(--surface);
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    appearance: none;
-    -webkit-appearance: none;
-  }
-
-  .form-input::placeholder { color: var(--txt-muted); font-weight: 400; }
-
-  .form-input:focus, .form-select:focus {
-    border-color: var(--teal);
-    box-shadow: 0 0 0 3px rgba(86,191,201,0.18);
-  }
-
-  .form-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230C254C' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 34px;
-    cursor: pointer;
-  }
-
-  .input-with-flag { position: relative; }
-  .input-flag { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
-  .input-with-flag .form-input { padding-left: 36px; }
-
-  /* DELIVERY */
-  .delivery-options { display: flex; flex-direction: column; gap: 8px; }
-
-  .delivery-opt {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    cursor: pointer;
-    transition: border-color 0.15s, background 0.1s;
-    background: var(--surface);
-    user-select: none;
-  }
-
-  .delivery-opt:hover { background: #edf8f9; border-color: var(--teal); }
-  .delivery-opt.active { border-color: var(--teal); border-width: 2px; background: #edf8f9; }
-
-  .delivery-opt input[type="radio"] { width: 16px; height: 16px; accent-color: var(--teal); flex-shrink: 0; }
-
-  .do-info  { flex: 1; }
-  .do-name  { font-size: 14px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .do-sub   { font-size: 12px; color: var(--txt-mid); margin-top: 2px; font-weight: 600; }
-  .do-price { font-size: 15px; font-weight: 800; color: var(--navy); font-family: 'DM Mono', monospace; flex-shrink: 0; }
-
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    font-size: 9.5px;
-    font-weight: 800;
-    padding: 2px 8px;
-    border-radius: 20px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .badge-fastest { background: var(--orange); color: var(--navy); }
-  .badge-free    { background: var(--teal);   color: var(--navy); }
-
-  /* PAYMENT */
-  .payment-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-
-  .pay-tab {
-    height: 36px;
-    padding: 0 14px;
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius);
-    font-size: 11px;
-    font-weight: 800;
-    cursor: pointer;
-    background: var(--surface);
-    color: var(--txt-mid);
-    transition: all 0.15s;
-    font-family: 'Nunito Sans', sans-serif;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-  }
-
-  .pay-tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
-  .pay-tab:hover:not(.active) { border-color: var(--teal); color: var(--navy); }
-
-  .card-icons { display: flex; gap: 6px; margin-bottom: 16px; }
-
-  .card-icon {
-    height: 24px;
-    width: 38px;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    font-weight: 800;
-    background: var(--surface);
-  }
-
-  .input-card { position: relative; }
-  .input-card .form-input { padding-right: 60px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
-  .card-type { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 800; color: var(--txt-muted); }
-
-  /* CTA */
-  .place-order-btn {
-    width: 100%;
-    height: 56px;
-    background: var(--orange);
-    color: var(--navy);
-    border: none;
-    border-radius: var(--radius);
-    font-family: 'Nunito Sans', sans-serif;
-    font-size: 15px;
-    font-weight: 800;
-    cursor: pointer;
-    transition: background 0.15s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    margin-top: 20px;
-    letter-spacing: 0.02em;
-    text-transform: uppercase;
-  }
-
-  .place-order-btn:hover  { background: var(--orange-dk); }
-  .place-order-btn:active { transform: scale(0.99); }
-
-  .trust-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
-
-  .trust-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--txt-muted); font-weight: 700; }
-  .trust-item svg { color: var(--teal); }
-
-  /* ASIDE */
-  .aside-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
-
-  .aside-header { background: var(--navy); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--teal); }
-  .aside-header-title { font-size: 10.5px; font-weight: 800; color: var(--white); text-transform: uppercase; letter-spacing: 0.12em; }
-  .aside-header-count { font-size: 11px; color: var(--teal); font-weight: 800; }
-
-  .aside-body { padding: 16px 18px; }
-
-  .cart-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .cart-item:last-child { border-bottom: none; }
-
-  .item-thumb {
-    width: 56px; height: 56px;
-    border-radius: var(--radius);
-    background: var(--off-white);
-    border: 1px solid var(--border);
-    flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    position: relative;
-  }
-
-  .qty-bubble {
-    position: absolute; top: -6px; right: -6px;
-    background: var(--navy); color: var(--white);
-    width: 19px; height: 19px; border-radius: 50%;
-    font-size: 10px; font-weight: 800;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  .item-details { flex: 1; min-width: 0; }
-  .item-name { font-size: 13px; font-weight: 700; line-height: 1.35; color: var(--txt-navy); }
-  .item-cat  { font-size: 11px; color: var(--txt-muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
-  .item-price { font-size: 14px; font-weight: 800; color: var(--navy); font-family: 'DM Mono', monospace; flex-shrink: 0; }
-
-  /* VOUCHER */
-  .voucher-row { display: flex; gap: 8px; margin: 14px 0; }
-
-  .voucher-input {
-    flex: 1; height: 40px;
-    border: 1.5px solid var(--border); border-radius: var(--radius);
-    padding: 0 12px;
-    font-family: 'Nunito Sans', sans-serif; font-size: 13px; font-weight: 600;
-    color: var(--txt-navy); background: var(--off-white); outline: none;
-    transition: border-color 0.15s;
-  }
-
-  .voucher-input:focus { border-color: var(--teal); background: var(--surface); }
-  .voucher-input::placeholder { color: var(--txt-muted); font-weight: 400; }
-
-  .voucher-btn {
-    height: 40px; padding: 0 16px;
-    border: 1.5px solid var(--navy); border-radius: var(--radius);
-    font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 800;
-    cursor: pointer; background: var(--navy); color: var(--white);
-    transition: background 0.15s;
-    text-transform: uppercase; letter-spacing: 0.06em;
-  }
-
-  .voucher-btn:hover { background: var(--navy-mid); }
-
-  /* FREE SHIP BAR */
-  .free-ship-bar { background: #edf9fa; border: 1px solid rgba(86,191,201,0.28); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 14px; }
-  .free-ship-text { font-size: 12px; color: var(--txt-mid); font-weight: 600; }
-  .free-ship-text strong { color: var(--navy); font-weight: 800; }
-  .progress-track { height: 5px; background: rgba(86,191,201,0.18); border-radius: 3px; margin-top: 8px; overflow: hidden; }
-  .progress-fill  { height: 100%; width: 51%; background: var(--teal); border-radius: 3px; transition: width 0.4s ease; }
-
-  /* TOTALS */
-  .summary-totals { border-top: 1px solid var(--border); padding-top: 14px; }
-
-  .totals-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: var(--txt-mid); font-weight: 600; }
-  .totals-line .val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--txt-mid); }
-
-  .totals-line.grand { font-size: 15px; font-weight: 800; color: var(--navy); border-top: 1px solid var(--border); margin-top: 10px; padding-top: 12px; margin-bottom: 0; }
-  .totals-line.grand .val { font-size: 20px; color: var(--navy); font-weight: 700; }
-
-  .totals-line.gst { margin-top: 5px; font-size: 11px; color: var(--txt-muted); margin-bottom: 0; }
-  .totals-line.gst .val { font-size: 11px; color: var(--txt-muted); }
-
-  /* RESPONSIVE */
-  @media (max-width: 780px) {
-    .checkout-layout { grid-template-columns: 1fr; }
-    .checkout-aside  { position: static; padding: 1rem; order: -1; }
-    .checkout-main   { padding: 1rem 1rem 3rem; }
-    .express-grid    { grid-template-columns: 1fr; }
-    .form-row        { grid-template-columns: 1fr; }
-    .checkout-progress { padding: 0 1rem; }
-    .site-header     { padding: 0 1rem; }
-  }
-
-  .hidden { display: none; }
+/*
+  ── JAYCAR BRAND COLOUR REFERENCE (Guidelines 2018) ────────────────
+  PRIMARY
+    Jaycar Blue  #0C254C   nav, headers, text, CTAs
+    Orange       #F18805   buy actions, highlights
+    Cyan         #009FE3   info, links
+    Lime         #95C11F   (available if needed)
+    Grape        #951B81   (available if needed)
+  SECONDARY
+    Teal         #56BFCA   interactive accents, focus, progress
+    Magenta      #E5007D   warnings, alerts, badges
+    Gold         #F6C100   highlights (non-sale)
+    Warm Grey    #DCD7D4   page background, subtle surfaces
+    Sale Red     #CF0B2A   price/sale callouts, errors, blocking states
+  ────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* ── Primary palette ── */
+  --navy:        #0C254C;
+  --orange:      #F18805;
+  --cyan:        #009FE3;
+
+  /* ── Secondary palette ── */
+  --teal:        #56BFCA;
+  --magenta:     #E5007D;
+  --gold:        #F6C100;
+  --warm-grey:   #DCD7D4;
+  --sale-red:    #CF0B2A;
+
+  /* ── Derived/tints from brand palette ── */
+  --navy-mid:    #1a3460;          /* darkened navy for layering */
+  --navy-light:  #1e3d6a;          /* version tooltip bg */
+  --orange-bg:   rgba(241,136,5,0.08);
+  --orange-bdr:  rgba(241,136,5,0.28);
+  --teal-bg:     rgba(86,191,202,0.10);
+  --teal-bdr:    rgba(86,191,202,0.28);
+  --red-bg:      rgba(207,11,42,0.07);   /* sale-red tint */
+  --red-bdr:     rgba(207,11,42,0.22);
+  --green:       #2E7D32;          /* success/resolved state — not in brand palette,
+                                      closest approved: lime #95C11F used for badges */
+  --green-bg:    rgba(46,125,50,0.08);
+  --green-bdr:   rgba(46,125,50,0.22);
+
+  /* ── Neutrals ── */
+  --white:       #ffffff;
+  --grey-bg:     #DCD7D4;          /* brand Warm Grey — page bg */
+  --border:      #E0E0E0;
+  --border-mid:  #c8c8c8;
+  --txt:         #0C254C;          /* brand Navy — all body text */
+  --txt-mid:     #4a5568;
+  --txt-muted:   #8692A6;
+  --surface:     #ffffff;
+
+  /* ── Layout ── */
+  --radius:      4px;
+  --radius-lg:   4px;
+  --font:        'Figtree', sans-serif;
+  --shadow-sm:   0 1px 3px rgba(12,37,76,0.08), 0 1px 2px rgba(12,37,76,0.04);
+  --shadow-md:   0 4px 12px rgba(12,37,76,0.1), 0 2px 4px rgba(12,37,76,0.05);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font);
+  background: var(--grey-bg);
+  color: var(--txt);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  padding-top: 68px; /* single-row nav */
+}
+
+/* ══════════════════════════════════════
+   HEADER — single row, no search, no burger
+══════════════════════════════════════ */
+.site-header {
+  background: var(--navy);
+  height: 68px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 600;
+}
+
+/* Logo */
+.nav-logo-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  cursor: default;
+  user-select: none;
+}
+.nav-logo-wrap img { height: 30px; width: auto; display: block; }
+
+/* Version tooltip */
+#ver-tooltip {
+  display: none;
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  background: white;
+  color: var(--navy);
+  border-radius: 4px;
+  padding: 14px 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+  min-width: 360px;
+  z-index: 9999;
+  font-family: var(--font);
+  font-size: 12px;
+  line-height: 1.6;
+}
+.nav-logo-wrap:hover #ver-tooltip { display: block; }
+
+/* Store info */
+.header-right { display: flex; align-items: center; gap: 24px; margin-left: auto; padding-left: 32px; }
+.nav-store-info { display: flex; align-items: center; gap: 6px; font-size: 12px; color: rgba(255,255,255,0.8); }
+.nav-store-info svg { width: 15px; height: 15px; flex-shrink: 0; opacity: 0.7; }
+.store-label { font-size: 10px; opacity: 0.6; display: block; line-height: 1; }
+.store-val   { font-size: 12px; font-weight: 600; display: block; line-height: 1.3; }
+.nav-divider { width: 1px; height: 32px; background: rgba(255,255,255,0.18); }
+
+/* Nav icon buttons */
+.nav-icon-btn { display: flex; flex-direction: column; align-items: center; gap: 3px; color: white; text-decoration: none; font-size: 10px; cursor: pointer; font-family: var(--font); opacity: 0.85; transition: opacity 0.15s; }
+.nav-icon-btn:hover { opacity: 1; }
+.nav-icon-btn svg { width: 22px; height: 22px; }
+
+/* Secure badge */
+.header-secure { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.5); letter-spacing: 0.02em; }
+
+/* ══════════════════════════════════════
+   CHECKOUT PROGRESS BAR
+══════════════════════════════════════ */
+.progress-bar {
+  background: var(--navy-mid);
+  padding: 0 32px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  border-bottom: 3px solid var(--teal);  /* brand Teal #56BFCA */
+  position: sticky;
+  top: 68px;
+  z-index: 100;
+}
+.p-step { display: flex; align-items: center; gap: 7px; font-size: 10px; font-weight: 800; color: rgba(255,255,255,0.38); text-transform: uppercase; letter-spacing: 0.07em; white-space: nowrap; font-family: var(--font); }
+.p-step.done   { color: var(--teal); }   /* Teal #56BFCA — completed */
+.p-step.active { color: var(--white); }
+.p-num { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; flex-shrink: 0; }
+.p-step.done .p-num   { background: var(--teal); border-color: var(--teal); color: var(--navy); }
+.p-step.active .p-num { background: var(--orange); border-color: var(--orange); color: var(--navy); } /* Orange #F18805 */
+.p-div { width: 24px; height: 1px; background: rgba(255,255,255,0.2); margin: 0 8px; flex-shrink: 0; }
+
+/* ══════════════════════════════════════
+   PAGE LAYOUT
+══════════════════════════════════════ */
+.page-outer { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+.page { display: grid; grid-template-columns: 1fr 380px; gap: 0; padding: 2rem 0 4rem; align-items: start; }
+.main  { padding-right: 2rem; }
+.aside { position: sticky; top: 115px; } /* 68 header + 44 progress + 3 border */
+
+/* ══════════════════════════════════════
+   SECTION NUMBERS
+══════════════════════════════════════ */
+.section-num { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.section-num .num { width: 24px; height: 24px; border-radius: 50%; background: var(--navy); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 800; flex-shrink: 0; }
+.section-num .lbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--txt-mid); }
+
+/* ══════════════════════════════════════
+   CARDS
+══════════════════════════════════════ */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 16px; box-shadow: var(--shadow-sm); overflow: hidden; }
+.card-head { background: var(--navy); padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+.card-head-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--white); }
+.card-head-action { font-size: 12px; font-weight: 700; color: var(--teal); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.card-body { padding: 20px; }
+
+/* ══════════════════════════════════════
+   BASKET ALERT — Orange #F18805
+══════════════════════════════════════ */
+.basket-alert {
+  background: var(--orange-bg);
+  border: 1.5px solid var(--orange-bdr);
+  border-left: 4px solid var(--orange);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.basket-alert-head { background: rgba(241,136,5,0.06); padding: 14px 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--orange-bdr); }
+.alert-icon { width: 32px; height: 32px; border-radius: 50%; background: var(--orange); color: var(--white); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 900; flex-shrink: 0; }
+.alert-title { font-size: 14px; font-weight: 800; color: var(--navy); }
+.alert-sub { font-size: 12px; font-weight: 600; color: var(--txt-mid); margin-top: 2px; }
+.basket-alert-body { padding: 16px 20px; }
+.alert-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+/* ══════════════════════════════════════
+   DELIVERY METHOD SELECTOR
+══════════════════════════════════════ */
+.method-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.method-card { border: 2px solid var(--border); border-radius: var(--radius-lg); padding: 16px; cursor: pointer; transition: all 0.15s; background: var(--surface); position: relative; user-select: none; }
+.method-card:hover      { border-color: var(--teal); background: var(--teal-bg); }
+.method-card.selected   { border-color: var(--teal); background: var(--teal-bg); }
+.method-card.blocked    { border-color: var(--orange-bdr); background: var(--orange-bg); opacity: 0.85; cursor: default; }
+.method-card.recommended { border-color: var(--cyan); background: rgba(0,159,227,0.07); } /* Cyan #009FE3 */
+
+.method-badge { position: absolute; top: -1px; right: 12px; font-size: 9px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 3px 10px; border-radius: 0 0 4px 4px; }
+.badge-recommended { background: var(--cyan); color: var(--white); }   /* Cyan #009FE3 */
+.badge-blocked     { background: var(--orange); color: var(--white); } /* Orange #F18805 */
+
+.method-icon { width: 36px; height: 36px; border-radius: 4px; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
+.method-icon.delivery { background: rgba(12,37,76,0.08); }
+.method-icon.collect  { background: rgba(0,159,227,0.1); border: 1px solid rgba(0,159,227,0.25); } /* Cyan tint */
+
+.method-title { font-size: 14px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
+.method-desc  { font-size: 12px; font-weight: 600; color: var(--txt-mid); line-height: 1.45; }
+.method-status-line { display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 700; margin-top: 10px; }
+.status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.dot-ok      { background: var(--cyan); }    /* Cyan #009FE3 — available */
+.dot-blocked { background: var(--orange); }  /* Orange #F18805 — unavailable */
+
+/* ══════════════════════════════════════
+   ITEM ISSUE CARD — Sale Red #CF0B2A
+══════════════════════════════════════ */
+.issue-card { background: var(--red-bg); border: 1.5px solid var(--red-bdr); border-left: 4px solid var(--sale-red); border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
+.issue-card-head { padding: 12px 18px; background: rgba(207,11,42,0.05); border-bottom: 1px solid var(--red-bdr); display: flex; align-items: center; justify-content: space-between; }
+.issue-card-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--sale-red); }
+.issue-card-body { padding: 16px 18px; }
+.issue-item-row { display: flex; gap: 14px; align-items: flex-start; }
+.issue-thumb { width: 60px; height: 60px; border-radius: 4px; background: rgba(207,11,42,0.05); border: 1px solid var(--red-bdr); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.issue-item-info { flex: 1; }
+.issue-item-name { font-size: 13px; font-weight: 700; color: var(--navy); margin-bottom: 6px; line-height: 1.35; }
+.issue-status-row { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.issue-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+
+/* ══════════════════════════════════════
+   RESOLVED BANNER — Cyan #009FE3
+══════════════════════════════════════ */
+.resolved-banner {
+  background: rgba(0,159,227,0.08);
+  border: 1.5px solid rgba(0,159,227,0.25);
+  border-left: 4px solid var(--cyan);
+  border-radius: var(--radius-lg);
+  padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.resolved-title { font-size: 13px; font-weight: 800; color: var(--navy); }
+.resolved-sub   { font-size: 12px; font-weight: 600; color: var(--txt-mid); margin-top: 1px; }
+
+/* ══════════════════════════════════════
+   LOCKED SECTIONS
+══════════════════════════════════════ */
+.locked-section { border: 1px dashed var(--border-mid); border-radius: var(--radius-lg); padding: 20px; margin-bottom: 16px; background: rgba(220,215,212,0.4); display: flex; align-items: center; gap: 14px; opacity: 0.65; }
+.lock-icon-wrap { width: 32px; height: 32px; border-radius: 50%; background: var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.locked-label { font-size: 12px; font-weight: 700; color: var(--txt-muted); }
+.locked-sub   { font-size: 11px; color: var(--txt-muted); margin-top: 2px; }
+
+/* ══════════════════════════════════════
+   FORM ELEMENTS
+══════════════════════════════════════ */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-label { display: block; font-size: 10.5px; font-weight: 800; color: var(--navy); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.07em; }
+.form-input, .form-select { width: 100%; height: 42px; border: 1.5px solid var(--border); border-radius: var(--radius); padding: 0 12px; font-family: var(--font); font-size: 14px; font-weight: 500; color: var(--txt); background: var(--surface); outline: none; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; -webkit-appearance: none; }
+.form-input::placeholder { color: var(--txt-muted); font-weight: 400; }
+.form-input:focus, .form-select:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(86,191,202,0.18); } /* Teal #56BFCA */
+.form-select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230C254C' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; cursor: pointer; }
+
+/* ══════════════════════════════════════
+   BUTTONS
+   Orange #F18805 — primary action
+   Navy #0C254C  — secondary/navy
+   Sale Red #CF0B2A — danger/remove
+   Cyan #009FE3 — positive/resolved
+══════════════════════════════════════ */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 0 18px; height: 40px; border-radius: var(--radius); font-family: var(--font); font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.15s; text-transform: uppercase; letter-spacing: 0.05em; border: none; }
+.btn-sm { height: 34px; padding: 0 14px; font-size: 11px; }
+.btn-primary { background: var(--orange); color: var(--white); }
+.btn-primary:hover { background: #d97704; }
+.btn-navy { background: var(--navy); color: var(--white); }
+.btn-navy:hover { background: var(--navy-mid); }
+.btn-ghost { background: transparent; color: var(--navy); border: 1.5px solid var(--border-mid); }
+.btn-ghost:hover { border-color: var(--navy); }
+.btn-cyan { background: var(--cyan); color: var(--white); }   /* replaces btn-green */
+.btn-cyan:hover { background: #0089c7; }
+.btn-danger { background: transparent; color: var(--sale-red); border: 1.5px solid rgba(207,11,42,0.3); }
+.btn-danger:hover { background: var(--red-bg); }
+.btn-full { width: 100%; }
+.btn-cta { height: 52px; font-size: 14px; }
+
+/* ══════════════════════════════════════
+   PAYMENT
+══════════════════════════════════════ */
+.express-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.pay-express-btn { height: 44px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; cursor: pointer; font-family: var(--font); font-size: 13px; font-weight: 800; border: 1px solid var(--border); transition: opacity 0.15s; }
+.pay-express-btn:hover { opacity: 0.85; }
+.gpay   { background: #000; color: #fff; border-color: #000; letter-spacing: 0.04em; }
+.paypal { background: #ffc439; color: #003087; border-color: #ffc439; font-style: italic; font-size: 14px; }
+.ap     { background: #b2fce4; color: #000; border-color: #b2fce4; font-size: 12px; }
+.or-line { display: flex; align-items: center; gap: 12px; margin: 14px 0; font-size: 10px; font-weight: 800; color: var(--txt-muted); text-transform: uppercase; letter-spacing: 0.12em; }
+.or-line::before, .or-line::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+.card-input-wrap { position: relative; }
+.card-input-wrap .form-input { padding-right: 60px; font-family: monospace; letter-spacing: 0.04em; }
+.card-brand-tag { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 10px; font-weight: 800; color: var(--txt-muted); }
+.card-logos { display: flex; gap: 6px; margin-bottom: 14px; }
+.card-logo { height: 22px; width: 36px; border: 1px solid var(--border); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 800; }
+
+/* ══════════════════════════════════════
+   ORDER SUMMARY RAIL
+══════════════════════════════════════ */
+.summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md); }
+.summary-head { background: var(--navy); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--teal); } /* Teal #56BFCA */
+.summary-head-title { font-size: 10px; font-weight: 800; color: var(--white); text-transform: uppercase; letter-spacing: 0.12em; }
+.summary-head-count { font-size: 11px; font-weight: 800; color: var(--teal); } /* Teal */
+.summary-body { padding: 16px 18px; }
+
+.cart-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cart-item:last-child { border-bottom: none; }
+.cart-thumb { width: 50px; height: 50px; border-radius: 4px; background: var(--warm-grey); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+.cart-qty { position: absolute; top: -6px; right: -6px; background: var(--navy); color: var(--white); width: 18px; height: 18px; border-radius: 50%; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+.cart-info { flex: 1; min-width: 0; }
+.cart-name { font-size: 12px; font-weight: 700; color: var(--navy); line-height: 1.35; }
+.cart-cat  { font-size: 10.5px; color: var(--txt-muted); font-family: monospace; margin-top: 2px; }
+.cart-flag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bdr); padding: 2px 7px; border-radius: 4px; margin-top: 4px; }
+.cart-price { font-size: 13px; font-weight: 700; color: var(--navy); font-family: monospace; flex-shrink: 0; }
+
+.summary-divider { height: 0.5px; background: var(--border); margin: 12px 0; }
+.summary-line { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--txt-mid); margin-bottom: 6px; }
+.summary-line .val { font-family: monospace; font-size: 12.5px; }
+.summary-line.total { font-size: 15px; font-weight: 800; color: var(--navy); margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); margin-bottom: 0; }
+.summary-line.total .val { font-size: 20px; }
+.summary-line.gst { font-size: 10.5px; color: var(--txt-muted); margin-bottom: 0; margin-top: 4px; }
+
+.fulfilment-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
+.pill-collect  { background: rgba(0,159,227,0.1); color: var(--navy); border: 1px solid rgba(0,159,227,0.3); }  /* Cyan tint */
+.pill-delivery { background: rgba(86,191,202,0.1); color: var(--navy); border: 1px solid rgba(86,191,202,0.28); } /* Teal tint */
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: fadeUp 0.3s ease both; }
+.hidden { display: none !important; }
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+.site-footer { background: var(--navy); color: white; margin-top: 40px; }
+.footer-top { display: grid; grid-template-columns: 180px 1fr 1fr 1fr 1fr minmax(200px, 560px); gap: 0; padding: 28px 32px; border-bottom: 1px solid rgba(255,255,255,0.1); align-items: start; }
+.footer-logo-col { padding-right: 24px; border-right: 1px solid rgba(255,255,255,0.1); }
+.footer-tagline { font-size: 11px; color: rgba(255,255,255,0.55); line-height: 1.4; margin-bottom: 10px; }
+.footer-social { display: flex; gap: 6px; }
+.footer-social-btn { width: 26px; height: 26px; border: 1px solid rgba(255,255,255,0.2); border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.7); text-decoration: none; transition: background 0.15s; }
+.footer-social-btn:hover { background: rgba(255,255,255,0.1); color: white; }
+.footer-col { padding: 0 18px; border-right: 1px solid rgba(255,255,255,0.1); display: flex; flex-direction: column; }
+.footer-col:last-child { border-right: none; }
+.footer-col-title { font-size: 10px; font-weight: 800; letter-spacing: 0.8px; text-transform: uppercase; color: rgba(255,255,255,0.45); margin-bottom: 8px; }
+.footer-link { font-size: 12px; color: rgba(255,255,255,0.7); text-decoration: none; padding: 3px 0; transition: color 0.15s; line-height: 1.3; }
+.footer-link:hover { color: white; }
+.footer-img-col { padding-left: 18px; display: flex; align-items: center; justify-content: flex-end; }
+.footer-img-col img { width: 100%; max-width: 560px; height: auto; max-height: 160px; object-fit: contain; border-radius: 4px; display: block; }
+.footer-hours-table { display: flex; flex-direction: column; margin-bottom: 8px; }
+.fh-row { display: flex; justify-content: space-between; font-size: 11px; padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.07); color: rgba(255,255,255,0.75); }
+.fh-row:last-child { border-bottom: none; }
+.fh-day  { color: rgba(255,255,255,0.5); }
+.fh-time { font-weight: 500; }
+.footer-phone { font-size: 14px; font-weight: 700; color: white; text-decoration: none; margin-top: 4px; display: block; }
+.footer-phone:hover { color: var(--orange); }  /* Orange #F18805 hover */
+.footer-bottom { padding: 14px 32px; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.4); }
+.footer-bottom-links { display: flex; gap: 20px; }
+.footer-bottom-links a { color: rgba(255,255,255,0.4); text-decoration: none; font-size: 12px; }
+.footer-bottom-links a:hover { color: rgba(255,255,255,0.7); }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 860px) {
+  .page { grid-template-columns: 1fr; }
+  .aside { position: static; }
+  .main { padding-right: 0; }
+  .method-grid { grid-template-columns: 1fr; }
+  .express-row { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .footer-img-col { display: none; }
+}
 </style>
 </head>
 <body>
 
+<!-- ══════════════════════════════════════
+     HEADER — logo + store info + cart icons
+     No search bar. No burger/nav row.
+══════════════════════════════════════ -->
 <header class="site-header">
-  <div class="logo-wrap">
-    <div class="logo-lockup">
-      <span class="logo-just-ask">Just Ask</span>
-      <div class="logo-jaycar-row">
-        <div class="logo-dot-mark"></div>
-        <span class="logo-jaycar-text">jaycar</span>
-      </div>
-    </div>
-    <div class="version-tooltip" role="tooltip">
-      <div class="vt-row">
-        <span class="vt-label">Version</span>
-        <span class="vt-badge">v1.2.0</span>
-      </div>
-      <div class="vt-row">
-        <span class="vt-label">Released</span>
-        <span class="vt-value">2026-04-20</span>
-      </div>
-      <div class="vt-divider"></div>
-      <div class="vt-row">
-        <span class="vt-label">Latest</span>
-        <span class="vt-value" style="color:rgba(255,255,255,0.75);font-family:'Nunito Sans',sans-serif;text-align:right;max-width:140px">Brand style guide applied</span>
-      </div>
-      <div class="vt-row" style="margin-top:2px">
-        <span class="vt-label">v1.1.0</span>
-        <span class="vt-value" style="color:rgba(255,255,255,0.35);font-family:'Nunito Sans',sans-serif">Version control</span>
-      </div>
-      <div class="vt-row">
-        <span class="vt-label">v1.0.0</span>
-        <span class="vt-value" style="color:rgba(255,255,255,0.22);font-family:'Nunito Sans',sans-serif">Initial build</span>
+  <div class="nav-logo-wrap">
+    <img src="https://www.jaycar.com.au/_next/static/media/jaycar-logo.a95c232b.svg"
+         alt="Jaycar Electronics"
+         onerror="this.style.display='none';this.nextElementSibling.style.display='block'"/>
+    <span style="display:none;color:white;font-size:20px;font-weight:800;letter-spacing:-1px;font-family:var(--font)">jaycar</span>
+
+    <div id="ver-tooltip">
+      <div style="font-weight:800;font-size:13px;margin-bottom:8px;border-bottom:1px solid #E0E0E0;padding-bottom:6px;">📋 Version History</div>
+      <div style="display:grid;grid-template-columns:40px 1fr;gap:2px 8px;font-size:11px;">
+        <span style="color:#8692A6;">v1.0</span><span>Initial build — single-page checkout</span>
+        <span style="color:#8692A6;">v1.2</span><span>Brand style guide applied</span>
+        <span style="color:#8692A6;">v2.0</span><span>Fulfilment-first redesign</span>
+        <span style="color:#8692A6;">v2.1</span><span>Design notes to version control</span>
+        <span style="color:#8692A6;">v2.2</span><span>PDP nav/footer, Figtree, 4px radii</span>
+        <span style="color:#8692A6;font-weight:700;">v2.3</span><span style="font-weight:700;">Colour audit, header simplified ← current</span>
       </div>
     </div>
   </div>
-  <div class="header-secure">
-    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-      <rect x="2" y="7" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
-      <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-    </svg>
-    Secure checkout
+
+  <div class="header-right">
+    <div class="nav-store-info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="10" r="3"/><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>
+      <div><span class="store-label">Deliver To</span><span class="store-val">Postcode</span></div>
+    </div>
+    <div class="nav-store-info">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <div><span class="store-label">Your Store</span><span class="store-val">Lidcombe</span></div>
+    </div>
+    <div class="nav-divider"></div>
+    <a class="nav-icon-btn" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </a>
+    <a class="nav-icon-btn" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      <span>My Lists</span>
+    </a>
+    <a class="nav-icon-btn" href="#">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
+      <span>Cart</span>
+    </a>
+    <div class="nav-divider"></div>
+    <div class="header-secure">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="2" y="7" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Secure checkout
+    </div>
   </div>
 </header>
 
-<nav class="checkout-progress" aria-label="Checkout steps">
-  <div class="progress-step done">
-    <div class="step-num">✓</div>Cart
-  </div>
-  <div class="progress-divider"></div>
-  <div class="progress-step active">
-    <div class="step-num">2</div>Checkout
-  </div>
-  <div class="progress-divider"></div>
-  <div class="progress-step">
-    <div class="step-num">3</div>Confirmation
-  </div>
+<!-- ══════════════════════════════════════
+     CHECKOUT PROGRESS BAR
+══════════════════════════════════════ -->
+<nav class="progress-bar" aria-label="Checkout steps">
+  <div class="p-step done"><div class="p-num">✓</div>Cart</div>
+  <div class="p-div"></div>
+  <div class="p-step active"><div class="p-num">2</div>Checkout</div>
+  <div class="p-div"></div>
+  <div class="p-step"><div class="p-num">3</div>Confirmation</div>
 </nav>
 
-<div class="checkout-layout">
+<!-- ══════════════════════════════════════
+     PAGE
+══════════════════════════════════════ -->
+<div class="page-outer">
+<div class="page">
 
-  <main class="checkout-main">
+  <!-- ════ LEFT COLUMN ════ -->
+  <main class="main">
 
-    <div class="express-wrap">
-      <div class="express-label">Express checkout</div>
-      <div class="express-grid">
-        <button class="express-btn btn-gpay">G Pay</button>
-        <button class="express-btn btn-paypal">PayPal</button>
-        <button class="express-btn btn-afterpay">afterpay›</button>
+    <!-- A. BASKET STATUS BLOCK -->
+    <div class="basket-alert animate-in" id="basket-alert">
+      <div class="basket-alert-head">
+        <div class="alert-icon">!</div>
+        <div>
+          <div class="alert-title">Basket needs attention</div>
+          <div class="alert-sub">1 clearance item can't be delivered to your address — choose how to fix it below</div>
+        </div>
       </div>
-    </div>
-
-    <div class="or-divider">or fill in your details</div>
-
-    <div class="form-block">
-      <div class="block-header">
-        <span class="block-title">Contact</span>
-        <span class="block-action">Sign in</span>
-      </div>
-      <div class="block-body">
-        <div class="form-group">
-          <label class="form-label" for="email">Email address</label>
-          <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
+      <div class="basket-alert-body">
+        <div class="alert-actions">
+          <button class="btn btn-sm btn-cyan" onclick="resolveCollect()">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 100 8A4 4 0 008 2zM2 14c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Switch to Click &amp; Collect
+          </button>
+          <button class="btn btn-sm btn-danger" onclick="resolveRemove()">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Remove blocked item
+          </button>
+          <button class="btn btn-sm btn-ghost" onclick="editPostcode()">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2a4 4 0 00-4 4c0 3 4 8 4 8s4-5 4-8a4 4 0 00-4-4z" stroke="currentColor" stroke-width="1.4"/><circle cx="8" cy="6" r="1.5" stroke="currentColor" stroke-width="1.2"/></svg>
+            Edit postcode
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="form-block">
-      <div class="block-header">
-        <span class="block-title">Delivery address</span>
+    <!-- RESOLVED BANNER -->
+    <div class="resolved-banner hidden animate-in" id="resolved-banner">
+      <div style="color:var(--cyan);flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#009FE3" stroke-width="1.5"/><path d="M6 10l3 3 5-5" stroke="#009FE3" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div class="block-body">
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="fname">First name</label>
-            <input class="form-input" type="text" id="fname" placeholder="First" autocomplete="given-name">
+      <div>
+        <div class="resolved-title" id="resolved-title">Basket issue resolved</div>
+        <div class="resolved-sub" id="resolved-sub">You're good to go — complete your details below</div>
+      </div>
+    </div>
+
+    <!-- B. DELIVERY METHOD -->
+    <div style="margin-bottom:20px;">
+      <div class="section-num"><div class="num">1</div><div class="lbl">How do you want to receive your order?</div></div>
+      <div class="method-grid">
+
+        <div class="method-card blocked" id="card-delivery" onclick="selectDelivery()">
+          <div class="method-badge badge-blocked">Issue</div>
+          <div class="method-icon delivery">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="6" width="14" height="10" rx="2" stroke="#0C254C" stroke-width="1.4"/><path d="M15 9l3 2v5h-3V9z" stroke="#0C254C" stroke-width="1.4" stroke-linejoin="round"/><circle cx="5" cy="17" r="1.5" stroke="#0C254C" stroke-width="1.2"/><circle cx="13" cy="17" r="1.5" stroke="#0C254C" stroke-width="1.2"/></svg>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="lname">Last name</label>
-            <input class="form-input" type="text" id="lname" placeholder="Last" autocomplete="family-name">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="company">Company <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt-muted)">(optional)</span></label>
-          <input class="form-input" type="text" id="company" placeholder="Your company" autocomplete="organization">
-        </div>
-        <div class="form-group">
-          <label class="form-label" for="address">Street address</label>
-          <input class="form-input" type="text" id="address" placeholder="Start typing your address…" autocomplete="street-address">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="suburb">Suburb</label>
-            <input class="form-input" type="text" id="suburb" placeholder="Suburb" autocomplete="address-level2">
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="postcode">Postcode</label>
-            <input class="form-input" type="text" id="postcode" placeholder="2000" maxlength="4" inputmode="numeric" autocomplete="postal-code">
+          <div class="method-title">Deliver to address</div>
+          <div class="method-desc">Standard or same-day delivery to your door</div>
+          <div class="method-status-line">
+            <div class="status-dot dot-blocked"></div>
+            <span style="color:var(--orange);font-size:11.5px;font-weight:700">1 item unavailable for delivery</span>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label" for="state">State</label>
-            <select class="form-select" id="state" autocomplete="address-level1">
-              <option value="">Select state</option>
-              <option>NSW</option><option>VIC</option><option>QLD</option>
-              <option>WA</option><option>SA</option><option>TAS</option>
-              <option>ACT</option><option>NT</option>
-            </select>
+
+        <div class="method-card recommended" id="card-collect" onclick="selectCollect()">
+          <div class="method-badge badge-recommended">Recommended</div>
+          <div class="method-icon collect">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2l2 5h5l-4 3 1.5 5L10 12l-4.5 3L7 10 3 7h5z" stroke="#009FE3" stroke-width="1.4" stroke-linejoin="round"/></svg>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="phone">Mobile</label>
-            <div class="input-with-flag">
-              <span class="input-flag">🇦🇺</span>
-              <input class="form-input" type="tel" id="phone" placeholder="04xx xxx xxx" autocomplete="tel" inputmode="tel">
+          <div class="method-title">Click &amp; Collect</div>
+          <div class="method-desc">Free collection from your nearest store — all items available</div>
+          <div class="method-status-line">
+            <div class="status-dot dot-ok"></div>
+            <span style="color:var(--cyan);font-size:11.5px;font-weight:700">All items available · Wetherill Park</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- C. ITEM ISSUE RESOLUTION -->
+    <div id="issue-section">
+      <div class="section-num"><div class="num">2</div><div class="lbl">Item needs a fix</div></div>
+      <div class="issue-card animate-in">
+        <div class="issue-card-head">
+          <span class="issue-card-title">⚠ Clearance item — delivery unavailable</span>
+          <span style="font-size:11px;font-weight:600;color:var(--txt-muted)">1 of 2 items affected</span>
+        </div>
+        <div class="issue-card-body">
+          <div class="issue-item-row">
+            <div class="issue-thumb">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <rect x="4" y="11" width="22" height="14" rx="3" stroke="#CF0B2A" stroke-width="1.4"/>
+                <circle cx="10" cy="18" r="3" fill="none" stroke="#CF0B2A" stroke-width="1.3"/>
+                <circle cx="22" cy="18" r="3" fill="none" stroke="#CF0B2A" stroke-width="1.3"/>
+                <line x1="16" y1="11" x2="16" y2="7" stroke="#CF0B2A" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="issue-item-info">
+              <div class="issue-item-name">2in1 Portable Split Wireless Speakers 10W IPX6 RGB — Clearance</div>
+              <div class="issue-status-row">
+                <div class="status-dot dot-blocked"></div>
+                <span style="color:var(--orange);font-size:12px;font-weight:700">Can't be delivered to your address</span>
+              </div>
+              <div class="issue-status-row">
+                <div class="status-dot dot-ok"></div>
+                <span style="color:var(--cyan);font-size:12px;font-weight:700">Available for Click &amp; Collect at Wetherill Park</span>
+              </div>
+              <div style="font-size:10.5px;color:var(--txt-muted);font-family:monospace;margin-top:4px;">CAT.NO: XC5262 &nbsp;·&nbsp; $44.95</div>
+              <div class="issue-actions">
+                <button class="btn btn-sm btn-cyan" onclick="resolveCollect()">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                  Collect this item instead
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="resolveRemove()">
+                  <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V2h4v2M5 4l1 9h4l1-9" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Remove item
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="form-block">
-      <div class="block-header">
-        <span class="block-title">Shipping options</span>
-      </div>
-      <div class="block-body">
-        <div class="delivery-options">
-          <label class="delivery-opt active" onclick="selectShipping(this,14.95)">
-            <input type="radio" name="ship" checked>
-            <div class="do-info">
-              <div class="do-name">Same day delivery <span class="badge badge-fastest">Fastest</span></div>
-              <div class="do-sub">Order before 3pm — delivered today</div>
-            </div>
-            <div class="do-price">$14.95</div>
-          </label>
-          <label class="delivery-opt" onclick="selectShipping(this,9.95)">
-            <input type="radio" name="ship">
-            <div class="do-info">
-              <div class="do-name">Standard shipping</div>
-              <div class="do-sub">Estimated Wed 22 Apr</div>
-            </div>
-            <div class="do-price">$9.95</div>
-          </label>
-          <label class="delivery-opt" onclick="selectShipping(this,0)">
-            <input type="radio" name="ship">
-            <div class="do-info">
-              <div class="do-name">Click &amp; collect <span class="badge badge-free">Free</span></div>
-              <div class="do-sub">Select your nearest Jaycar store</div>
-            </div>
-            <div class="do-price">Free</div>
-          </label>
+    <!-- D. CONTACT DETAILS -->
+    <div id="contact-section">
+      <div class="locked-section" id="contact-lock">
+        <div class="lock-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="7" width="12" height="8" rx="2" stroke="#8692a6" stroke-width="1.4"/><path d="M5 7V5a3 3 0 016 0v2" stroke="#8692a6" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="locked-label">Contact details</div>
+          <div class="locked-sub">Resolve the item issue above to unlock this section</div>
         </div>
       </div>
-    </div>
 
-    <div class="form-block">
-      <div class="block-header">
-        <span class="block-title">Payment</span>
-      </div>
-      <div class="block-body">
-        <div class="payment-tabs">
-          <button class="pay-tab active" onclick="switchTab(this,'card')">Card</button>
-          <button class="pay-tab" onclick="switchTab(this,'zip')">Zip</button>
-          <button class="pay-tab" onclick="switchTab(this,'latitude')">Latitude</button>
-          <button class="pay-tab" onclick="switchTab(this,'gift')">Gift card</button>
-        </div>
-
-        <div id="pay-card">
-          <div class="card-icons">
-            <div class="card-icon" style="color:#1a1f71;font-size:10px;font-weight:800">VISA</div>
-            <div class="card-icon" style="font-size:15px;font-weight:900;color:#eb001b">●<span style="color:#f79e1b;margin-left:-7px">●</span></div>
-            <div class="card-icon" style="font-size:9px;font-weight:800;color:#2e77bc">AMEX</div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="cardnum">Card number</label>
-            <div class="input-card">
-              <input class="form-input" type="text" id="cardnum" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19" autocomplete="cc-number">
-              <span class="card-type" id="card-type"></span>
-            </div>
-          </div>
-          <div class="form-row">
+      <div class="hidden" id="contact-form">
+        <div class="section-num" style="margin-bottom:12px;"><div class="num">3</div><div class="lbl">Your contact details</div></div>
+        <div class="card animate-in">
+          <div class="card-head"><span class="card-head-title">Contact</span></div>
+          <div class="card-body">
             <div class="form-group">
-              <label class="form-label" for="expiry">Expiry (MM/YY)</label>
-              <input class="form-input" type="text" id="expiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
+              <label class="form-label" for="email">Email address</label>
+              <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
             </div>
-            <div class="form-group">
-              <label class="form-label" for="cvv">Security code</label>
-              <input class="form-input" type="text" id="cvv" placeholder="CVV" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="fname">First name</label>
+                <input class="form-input" type="text" id="fname" placeholder="First" autocomplete="given-name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lname">Last name</label>
+                <input class="form-input" type="text" id="lname" placeholder="Last" autocomplete="family-name">
+              </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="cardname">Name on card</label>
-            <input class="form-input" type="text" id="cardname" placeholder="As it appears on card" autocomplete="cc-name">
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="mobile">Mobile number</label>
+              <input class="form-input" type="tel" id="mobile" placeholder="04xx xxx xxx" autocomplete="tel" inputmode="tel">
+            </div>
           </div>
         </div>
 
-        <div id="pay-zip" class="hidden">
-          <p style="font-size:13px;color:var(--txt-mid);padding:14px 0;font-weight:600">You'll be redirected to Zip to complete your payment securely.</p>
-        </div>
-        <div id="pay-latitude" class="hidden">
-          <p style="font-size:13px;color:var(--txt-mid);padding:14px 0;font-weight:600">You'll be redirected to Latitude Financial to complete your payment.</p>
-        </div>
-        <div id="pay-gift" class="hidden">
-          <div class="form-group" style="margin-top:10px">
-            <label class="form-label" for="giftcode">Gift card number</label>
-            <input class="form-input" type="text" id="giftcode" placeholder="Enter gift card number">
+        <div id="collect-address" class="card animate-in" style="margin-top:14px;">
+          <div class="card-head"><span class="card-head-title">Collection store</span></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,159,227,0.08);border:1px solid rgba(0,159,227,0.25);border-radius:4px;">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--navy);">Jaycar Wetherill Park</div>
+                <div style="font-size:12px;font-weight:600;color:var(--txt-mid);margin-top:2px;">1/7 Foundry Rd, Wetherill Park NSW 2164</div>
+                <div style="font-size:11px;color:var(--txt-muted);margin-top:2px;">Ready within 2 hours · Mon–Fri 8am–5:30pm</div>
+              </div>
+              <button class="btn btn-sm btn-ghost">Change</button>
+            </div>
           </div>
-          <div class="form-group">
-            <label class="form-label" for="giftpin">PIN</label>
-            <input class="form-input" type="text" id="giftpin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric">
+        </div>
+
+        <div id="delivery-address" class="card animate-in hidden" style="margin-top:14px;">
+          <div class="card-head"><span class="card-head-title">Delivery address</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label" for="address">Street address</label>
+              <input class="form-input" type="text" id="address" placeholder="Start typing your address…" autocomplete="street-address">
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label" for="suburb">Suburb</label><input class="form-input" type="text" id="suburb" placeholder="Suburb"></div>
+              <div class="form-group"><label class="form-label" for="postcode">Postcode</label><input class="form-input" type="text" id="postcode" placeholder="2000" maxlength="4" inputmode="numeric"></div>
+            </div>
+            <div class="form-row" style="margin-bottom:0">
+              <div class="form-group" style="margin-bottom:0">
+                <label class="form-label" for="state">State</label>
+                <select class="form-select" id="state">
+                  <option value="">Select state</option>
+                  <option>NSW</option><option>VIC</option><option>QLD</option>
+                  <option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+                </select>
+              </div>
+              <div class="form-group" style="margin-bottom:0"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <button class="place-order-btn" id="place-btn" onclick="handleOrder()">
-      Place order &nbsp;·&nbsp; <span id="cta-total">$89.85</span>
-    </button>
+    <!-- E. PAYMENT -->
+    <div id="payment-section" style="margin-top:16px;">
+      <div class="locked-section" id="payment-lock">
+        <div class="lock-icon-wrap">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="7" width="12" height="8" rx="2" stroke="#8692a6" stroke-width="1.4"/><path d="M5 7V5a3 3 0 016 0v2" stroke="#8692a6" stroke-width="1.4" stroke-linecap="round"/></svg>
+        </div>
+        <div>
+          <div class="locked-label">Payment</div>
+          <div class="locked-sub">Resolve the item issue above to unlock payment</div>
+        </div>
+      </div>
 
-    <div class="trust-row">
-      <span class="trust-item">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="6" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 6V4.5a4 4 0 018 0V6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
-        SSL secured
-      </span>
-      <span class="trust-item">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-        Free returns on eligible items
-      </span>
-      <span class="trust-item">
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5v4l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        1800 022 888
-      </span>
+      <div class="hidden" id="payment-form">
+        <div class="section-num" style="margin-bottom:12px;"><div class="num">4</div><div class="lbl">Payment</div></div>
+        <div class="card animate-in">
+          <div class="card-head"><span class="card-head-title">Choose payment method</span></div>
+          <div class="card-body">
+            <div class="express-row">
+              <button class="pay-express-btn gpay">G Pay</button>
+              <button class="pay-express-btn paypal">PayPal</button>
+              <button class="pay-express-btn ap">afterpay›</button>
+            </div>
+            <div class="or-line">or pay by card</div>
+            <div class="card-logos">
+              <div class="card-logo" style="color:#1a1f71;font-weight:800;">VISA</div>
+              <div class="card-logo"><span style="color:#eb001b;font-size:14px;font-weight:900;">●</span><span style="color:#f79e1b;font-size:14px;font-weight:900;margin-left:-6px;">●</span></div>
+              <div class="card-logo" style="font-size:8px;font-weight:800;color:#2e77bc;">AMEX</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cardnum">Card number</label>
+              <div class="card-input-wrap">
+                <input class="form-input" type="text" id="cardnum" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19" autocomplete="cc-number">
+                <span class="card-brand-tag" id="card-brand"></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="expiry">Expiry (MM/YY)</label>
+                <input class="form-input" type="text" id="expiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="cvv">Security code</label>
+                <input class="form-input" type="text" id="cvv" placeholder="CVV" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="cardname">Name on card</label>
+              <input class="form-input" type="text" id="cardname" placeholder="As it appears on card" autocomplete="cc-name">
+            </div>
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-full btn-cta animate-in" id="place-btn" onclick="handleOrder()" style="margin-top:4px;">
+          Place order &nbsp;·&nbsp; <span id="cta-total">$74.90</span>
+        </button>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:12px;flex-wrap:wrap;">
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);font-weight:700;">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="6" width="14" height="9" rx="2" stroke="#56BFCA" stroke-width="1.3"/><path d="M4 6V4.5a4 4 0 018 0V6" stroke="#56BFCA" stroke-width="1.3" stroke-linecap="round"/></svg>
+            SSL secured
+          </span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);font-weight:700;">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="#56BFCA" stroke-width="1.3" stroke-linejoin="round"/></svg>
+            Free returns on eligible items
+          </span>
+          <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);font-weight:700;">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#56BFCA" stroke-width="1.3"/><path d="M8 4.5v4l2.5 1.5" stroke="#56BFCA" stroke-width="1.3" stroke-linecap="round"/></svg>
+            1800 022 888
+          </span>
+        </div>
+      </div>
     </div>
 
   </main>
 
-  <aside class="checkout-aside" aria-label="Order summary">
-    <div class="aside-card">
-      <div class="aside-header">
-        <span class="aside-header-title">Order summary</span>
-        <span class="aside-header-count">2 items</span>
+  <!-- ════ RIGHT COLUMN — ORDER SUMMARY ════ -->
+  <aside class="aside">
+    <div class="summary-card">
+      <div class="summary-head">
+        <span class="summary-head-title">Order summary</span>
+        <span class="summary-head-count" id="item-count">2 items</span>
       </div>
-      <div class="aside-body">
+      <div class="summary-body">
 
-        <div class="cart-item">
-          <div class="item-thumb">
-            <div class="qty-bubble">1</div>
-            <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-              <rect x="4" y="11" width="22" height="13" rx="3" stroke="#56BFC9" stroke-width="1.5"/>
-              <circle cx="10" cy="17" r="2.5" fill="#56BFC9"/>
-              <circle cx="20" cy="17" r="2.5" fill="#56BFC9"/>
-              <path d="M15 11V7" stroke="#56BFC9" stroke-width="1.5" stroke-linecap="round"/>
+        <div class="fulfilment-pill pill-collect" id="fulfilment-pill">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span id="fulfilment-label">Click &amp; Collect · Wetherill Park</span>
+        </div>
+
+        <div class="cart-item" id="item-speaker">
+          <div class="cart-thumb">
+            <div class="cart-qty">1</div>
+            <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
+              <rect x="4" y="11" width="22" height="13" rx="3" stroke="#56BFCA" stroke-width="1.5"/>
+              <circle cx="10" cy="17" r="2.5" fill="#56BFCA"/><circle cx="20" cy="17" r="2.5" fill="#56BFCA"/>
+              <path d="M15 11V7" stroke="#56BFCA" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
           </div>
-          <div class="item-details">
-            <div class="item-name">2in1 Portable Split Wireless Speakers 10W IPX6</div>
-            <div class="item-cat">CAT.NO: XC5262</div>
+          <div class="cart-info">
+            <div class="cart-name">2in1 Split Wireless Speakers 10W</div>
+            <div class="cart-cat">XC5262</div>
+            <div class="cart-flag" id="speaker-flag">
+              <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v4M8 11v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              Clearance · delivery issue
+            </div>
           </div>
-          <div class="item-price">$44.95</div>
+          <div class="cart-price">$44.95</div>
         </div>
 
-        <div class="cart-item">
-          <div class="item-thumb">
-            <div class="qty-bubble">1</div>
-            <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
-              <circle cx="15" cy="15" r="8" stroke="#56BFC9" stroke-width="1.5"/>
-              <circle cx="15" cy="15" r="3.5" fill="#56BFC9"/>
+        <div class="cart-item" id="item-solder">
+          <div class="cart-thumb">
+            <div class="cart-qty">1</div>
+            <svg width="26" height="26" viewBox="0 0 30 30" fill="none">
+              <circle cx="15" cy="15" r="8" stroke="#56BFCA" stroke-width="1.5"/>
+              <circle cx="15" cy="15" r="3.5" fill="#56BFCA"/>
             </svg>
           </div>
-          <div class="item-details">
-            <div class="item-name">0.71mm Duratech Solder 200gm</div>
-            <div class="item-cat">CAT.NO: NS3005</div>
+          <div class="cart-info">
+            <div class="cart-name">0.71mm Duratech Solder 200gm</div>
+            <div class="cart-cat">NS3005</div>
           </div>
-          <div class="item-price">$29.95</div>
+          <div class="cart-price">$29.95</div>
         </div>
 
-        <div class="voucher-row">
-          <input class="voucher-input" type="text" placeholder="Discount code or gift card">
-          <button class="voucher-btn">Apply</button>
-        </div>
-
-        <div class="free-ship-bar">
-          <div class="free-ship-text">Add <strong>$74.11</strong> more for free standard delivery</div>
-          <div class="progress-track"><div class="progress-fill"></div></div>
-        </div>
-
-        <div class="summary-totals">
-          <div class="totals-line"><span>Subtotal (2 items)</span><span class="val">$74.90</span></div>
-          <div class="totals-line"><span>Shipping</span><span class="val" id="ship-display">$14.95</span></div>
-          <div class="totals-line grand"><span>Grand total</span><span class="val" id="grand-display">$89.85</span></div>
-          <div class="totals-line gst"><span>Includes GST</span><span class="val" id="gst-display">$8.17</span></div>
-        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-line"><span>Subtotal</span><span class="val" id="s-subtotal">$74.90</span></div>
+        <div class="summary-line"><span>Fulfilment</span><span class="val" style="color:var(--cyan);font-weight:800;" id="s-fulfilment">Free</span></div>
+        <div class="summary-line total"><span>Grand total</span><span class="val" id="s-total">$74.90</span></div>
+        <div class="summary-line gst"><span>Includes GST</span><span class="val">$6.81</span></div>
 
       </div>
     </div>
   </aside>
 
-</div>
+</div><!-- /page -->
+</div><!-- /page-outer -->
+
+<!-- ══════════════════════════════════════
+     FOOTER
+══════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="footer-top">
+    <div class="footer-logo-col">
+      <img src="https://www.jaycar.com.au/_next/static/media/jaycar-logo.a95c232b.svg"
+           alt="Jaycar" style="height:28px;width:auto;margin-bottom:12px;"
+           onerror="this.style.display='none'"/>
+      <p class="footer-tagline">Australia's electronics &amp; technology retailer.</p>
+      <div class="footer-social">
+        <a href="#" class="footer-social-btn">f</a>
+        <a href="#" class="footer-social-btn">in</a>
+        <a href="#" class="footer-social-btn">▶</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">About Us</div>
+      <a href="#" class="footer-link">About Jaycar</a>
+      <a href="#" class="footer-link">Careers</a>
+      <a href="#" class="footer-link">Sustainability</a>
+      <a href="#" class="footer-link">Media Centre</a>
+      <a href="#" class="footer-link">Affiliates Program</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Service</div>
+      <a href="#" class="footer-link">Contact Us</a>
+      <a href="#" class="footer-link">Returns &amp; Refunds</a>
+      <a href="#" class="footer-link">Warranty Information</a>
+      <a href="#" class="footer-link">Repair Centre</a>
+      <a href="#" class="footer-link">Privacy Policy</a>
+      <a href="#" class="footer-link">Terms &amp; Conditions</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Ways to Shop</div>
+      <a href="#" class="footer-link">Store Finder</a>
+      <a href="#" class="footer-link">Click &amp; Collect</a>
+      <a href="#" class="footer-link">Express Delivery</a>
+      <a href="#" class="footer-link">Bulk Orders</a>
+      <a href="#" class="footer-link">Gift Cards</a>
+      <a href="#" class="footer-link">Catalogues</a>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Call Centre Hours</div>
+      <div class="footer-hours-table">
+        <div class="fh-row"><span class="fh-day">Mon – Fri</span><span class="fh-time">8:00am – 7:00pm</span></div>
+        <div class="fh-row"><span class="fh-day">Saturday</span><span class="fh-time">8:30am – 5:00pm</span></div>
+        <div class="fh-row"><span class="fh-day">Sunday</span><span class="fh-time">10:00am – 4:00pm</span></div>
+        <div class="fh-row"><span class="fh-day">Public Hols</span><span class="fh-time">Closed</span></div>
+      </div>
+      <a href="tel:1800022888" class="footer-phone">1800 022 888</a>
+    </div>
+    <div class="footer-img-col">
+      <img src="https://braze-images.com/appboy/communication/assets/image_assets/images/69aa3d669efd190063a7011e/original.png?1772764517" alt="Jaycar Express Delivery"/>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Jaycar Electronics. All rights reserved.</span>
+    <div class="footer-bottom-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+      <a href="#">Sitemap</a>
+    </div>
+  </div>
+</footer>
 
 <script>
-  const SUB = 74.90;
+  let resolved = false;
+  let fulfilmentMode = 'collect';
 
-  function selectShipping(el, cost) {
-    document.querySelectorAll('.delivery-opt').forEach(o => o.classList.remove('active'));
-    el.classList.add('active');
-    el.querySelector('input').checked = true;
-    const grand = SUB + cost;
-    document.getElementById('ship-display').textContent  = cost === 0 ? 'Free' : '$' + cost.toFixed(2);
-    document.getElementById('grand-display').textContent = '$' + grand.toFixed(2);
-    document.getElementById('gst-display').textContent   = '$' + (grand / 11).toFixed(2);
-    document.getElementById('cta-total').textContent     = '$' + grand.toFixed(2);
+  function resolveCollect() {
+    fulfilmentMode = 'collect';
+    markResolved('Order updated to Click & Collect', 'Your full order will be ready to collect at Wetherill Park');
+    updateSummaryCollect();
+    document.getElementById('delivery-address').classList.add('hidden');
+    document.getElementById('collect-address').classList.remove('hidden');
+    document.getElementById('card-collect').classList.add('selected');
+    document.getElementById('card-collect').classList.remove('recommended');
+    document.getElementById('card-delivery').classList.add('blocked');
+    document.getElementById('speaker-flag').style.display = 'none';
+    document.getElementById('fulfilment-pill').className = 'fulfilment-pill pill-collect';
+    document.getElementById('fulfilment-label').innerHTML = 'Click &amp; Collect &middot; Wetherill Park';
   }
 
-  function switchTab(btn, panel) {
-    document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    ['pay-card','pay-zip','pay-latitude','pay-gift'].forEach(id => document.getElementById(id).classList.add('hidden'));
-    document.getElementById('pay-' + panel).classList.remove('hidden');
+  function resolveRemove() {
+    fulfilmentMode = 'delivery';
+    document.getElementById('item-speaker').style.display = 'none';
+    document.getElementById('item-count').textContent = '1 item';
+    document.getElementById('s-subtotal').textContent = '$29.95';
+    document.getElementById('s-total').textContent = '$29.95';
+    document.getElementById('s-fulfilment').textContent = '$9.95';
+    document.getElementById('s-fulfilment').style.color = 'var(--txt-mid)';
+    document.getElementById('s-fulfilment').style.fontWeight = '600';
+    document.getElementById('cta-total').textContent = '$39.90';
+    document.getElementById('fulfilment-pill').className = 'fulfilment-pill pill-delivery';
+    document.getElementById('fulfilment-label').innerHTML = 'Standard delivery';
+    document.getElementById('card-delivery').classList.remove('blocked');
+    document.getElementById('card-delivery').classList.add('selected');
+    document.getElementById('card-collect').classList.remove('recommended');
+    document.getElementById('delivery-address').classList.remove('hidden');
+    document.getElementById('collect-address').classList.add('hidden');
+    markResolved('Item removed', 'Your remaining item is available for delivery — enter your details below');
+  }
+
+  function editPostcode() {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:24px;border-radius:4px;box-shadow:0 8px 32px rgba(0,0,0,0.18);z-index:999;min-width:300px;font-family:Figtree,sans-serif;';
+    el.innerHTML = '<div style="font-size:14px;font-weight:800;color:#0C254C;margin-bottom:14px;">Edit your postcode</div><input id="pc-input" type="text" placeholder="Enter postcode" style="width:100%;height:42px;border:1.5px solid #E0E0E0;border-radius:4px;padding:0 12px;font-size:14px;margin-bottom:12px;font-family:inherit;" maxlength="4" inputmode="numeric"><div style="display:flex;gap:8px;"><button onclick="this.closest(\'div\').parentElement.remove()" style="flex:1;height:40px;background:transparent;border:1.5px solid #E0E0E0;border-radius:4px;font-weight:800;cursor:pointer;font-size:12px;font-family:inherit;">Cancel</button><button onclick="this.closest(\'div\').parentElement.remove()" style="flex:1;height:40px;background:#F18805;color:#fff;border:none;border-radius:4px;font-weight:800;cursor:pointer;font-size:12px;font-family:inherit;">Update</button></div>';
+    document.body.appendChild(el);
+    setTimeout(() => el.querySelector('#pc-input').focus(), 50);
+  }
+
+  function selectCollect() { if (!resolved) resolveCollect(); }
+  function selectDelivery() { if (!resolved) return; }
+
+  function markResolved(title, sub) {
+    resolved = true;
+    document.getElementById('basket-alert').classList.add('hidden');
+    document.getElementById('issue-section').classList.add('hidden');
+    document.getElementById('resolved-banner').classList.remove('hidden');
+    document.getElementById('resolved-title').textContent = title;
+    document.getElementById('resolved-sub').textContent = sub;
+    document.getElementById('contact-lock').classList.add('hidden');
+    document.getElementById('contact-form').classList.remove('hidden');
+    document.getElementById('payment-lock').classList.add('hidden');
+    document.getElementById('payment-form').classList.remove('hidden');
+  }
+
+  function updateSummaryCollect() {
+    document.getElementById('s-fulfilment').textContent = 'Free';
+    document.getElementById('s-fulfilment').style.color = 'var(--cyan)';
+    document.getElementById('s-fulfilment').style.fontWeight = '800';
+    document.getElementById('s-subtotal').textContent = '$74.90';
+    document.getElementById('s-total').textContent = '$74.90';
+    document.getElementById('cta-total').textContent = '$74.90';
   }
 
   const cardEl = document.getElementById('cardnum');
@@ -966,7 +1010,7 @@
     cardEl.addEventListener('input', e => {
       let v = e.target.value.replace(/\D/g,'').slice(0,16);
       e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
-      const b = document.getElementById('card-type');
+      const b = document.getElementById('card-brand');
       b.textContent = v.startsWith('4') ? 'VISA' : /^5[1-5]|^2[2-7]/.test(v) ? 'MC' : v.startsWith('3') ? 'AMEX' : '';
     });
   }
@@ -987,8 +1031,8 @@
     btn.disabled = true;
     setTimeout(() => {
       btn.innerHTML = 'Order confirmed ✓';
-      btn.style.background = 'var(--teal)';
-      btn.style.color = 'var(--navy)';
+      btn.style.background = 'var(--cyan)';
+      btn.style.color = 'var(--white)';
       btn.style.opacity = '1';
     }, 1600);
   }
