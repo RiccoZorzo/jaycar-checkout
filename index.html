@@ -29,6 +29,21 @@
     - Full PDP two-row nav + footer transplanted
     - Figtree font, all radii 4px, Jaycar SVG logo
 
+  v2.8.0 | 2026-04-21 | Sign-in block moved post-resolution
+    - [MOVED]   Account/guest block now sits after issue resolution, before contact
+    - [CHANGED] Account block starts hidden; revealed only by markResolved()
+    - [UNCHANGED] All fulfilment-first logic, basket alert, delivery toggle intact
+
+  v2.7.0 | 2026-04-21 | Lightweight account / loyalty sign-in block
+    - [NEW]     Sign in / guest choice block after delivery selector (section 2)
+    - [NEW]     Loyalty points cue: "Earn 338 points on this order"
+    - [NEW]     Email-first recognition: inline "Already have an account?" prompt
+    - [NEW]     Recognised-account hint below email on blur
+    - [CHANGED] Issue card renumbered to section 3, contact to 4, payment to 5
+    - [NEW]     Sign-in modal (lightweight inline expansion, not a page)
+    - [REMOVED] Any old large login/join promo — account block is compact only
+    - Sign-in is non-blocking: guest path always visible and orange
+
   v2.6.0 | 2026-04-21 | Error state on delivery revert, summary UX upgrades
     - [FIXED]   Switching back to delivery restores basket alert + issue card
     - [CHANGED] Cart thumbnails enlarged (70×70px)
@@ -88,7 +103,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2.6.0">
+<meta name="version" content="2.8.0">
 <meta name="last-updated" content="2026-04-21">
 <title>Checkout — Jaycar Electronics</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -492,6 +507,125 @@ body {
   .footer-top { grid-template-columns: 1fr 1fr; }
   .footer-img-col { display: none; }
 }
+
+/* ══════════════════════════════════════
+   SIGN IN / GUEST BLOCK (v2.7)
+══════════════════════════════════════ */
+.account-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+}
+.account-block-head {
+  background: var(--navy);
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.account-block-title { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.12em; color: var(--white); font-family: var(--font); }
+.account-block-points {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(246,193,0,0.18);
+  border: 1px solid rgba(246,193,0,0.35);
+  border-radius: 4px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold);
+  font-family: var(--font);
+}
+.account-block-body {
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  gap: 0;
+}
+.account-col {
+  padding: 18px 20px;
+}
+.account-col-divider {
+  background: var(--border);
+  margin: 12px 0;
+}
+.account-col-label {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 4px;
+  font-family: var(--font);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.account-col-sub {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--txt-mid);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  font-family: var(--font);
+}
+
+/* Sign-in expansion panel */
+.signin-panel {
+  display: none;
+  padding: 0 20px 18px;
+  border-top: 1px solid var(--border);
+  background: rgba(12,37,76,0.02);
+  animation: fadeUp 0.2s ease both;
+}
+.signin-panel.open { display: block; }
+.signin-panel .form-group { margin-bottom: 12px; }
+.signin-panel .form-group:last-of-type { margin-bottom: 0; }
+.signin-panel-actions { display: flex; gap: 8px; margin-top: 14px; align-items: center; }
+.signin-forgot { font-size: 11px; color: var(--txt-muted); font-family: var(--font); cursor: pointer; text-decoration: underline; margin-left: auto; white-space: nowrap; }
+.signin-forgot:hover { color: var(--navy); }
+.signin-separator { display: flex; align-items: center; gap: 10px; margin: 14px 0 10px; font-size: 10px; font-weight: 700; color: var(--txt-muted); text-transform: uppercase; letter-spacing: 0.1em; }
+.signin-separator::before, .signin-separator::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
+.signin-sso-btn { width: 100%; height: 40px; border: 1.5px solid var(--border); border-radius: var(--radius); background: white; font-family: var(--font); font-size: 12px; font-weight: 700; color: var(--navy); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: border-color 0.15s, background 0.15s; }
+.signin-sso-btn:hover { border-color: var(--navy); background: rgba(12,37,76,0.03); }
+
+/* Email recognition hint */
+.email-recognition {
+  display: none;
+  margin-top: 6px;
+  padding: 10px 14px;
+  background: rgba(0,159,227,0.07);
+  border: 1px solid rgba(0,159,227,0.22);
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: var(--font);
+  animation: fadeUp 0.2s ease both;
+}
+.email-recognition.show { display: flex; align-items: center; gap: 10px; }
+.email-recognition a { color: var(--cyan); text-decoration: underline; cursor: pointer; font-weight: 700; white-space: nowrap; }
+
+/* Loyalty nudge in summary */
+.loyalty-nudge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  background: rgba(246,193,0,0.09);
+  border: 1px solid rgba(246,193,0,0.3);
+  border-radius: 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--navy);
+  font-family: var(--font);
+}
+.loyalty-nudge .nudge-pts {
+  font-weight: 800;
+  color: #a07800;
+}
+.loyalty-nudge a { color: var(--cyan); text-decoration: underline; cursor: pointer; margin-left: auto; font-size: 11px; font-weight: 700; white-space: nowrap; }
 </style>
 </head>
 <body>
@@ -515,7 +649,8 @@ body {
         <span style="color:#8692A6;">v2.0</span><span>Fulfilment-first redesign</span>
         <span style="color:#8692A6;">v2.1</span><span>Design notes to version control</span>
         <span style="color:#8692A6;">v2.2</span><span>PDP nav/footer, Figtree, 4px radii</span>
-        <span style="color:#8692A6;font-weight:700;">v2.6</span><span style="font-weight:700;">Error state, summary UX, more cart items ← current</span>
+        <span style="color:#8692A6;font-weight:700;">v2.7</span><span style="font-weight:700;">Account / loyalty sign-in block ← current</span>
+        <span style="color:#8692A6;">v2.6</span><span>Error state, summary UX, more cart items</span>
         <span style="color:#8692A6;">v2.5</span><span>Icons, product images, delivery toggle</span>
         <span style="color:#8692A6;">v2.4</span><span>Header trimmed, background white</span>
         <span style="color:#8692A6;">v2.3</span><span>Colour audit to brand guide 2018</span>
@@ -632,9 +767,10 @@ body {
       </div>
     </div>
 
+
     <!-- C. ITEM ISSUE RESOLUTION -->
     <div id="issue-section">
-      <div class="section-num"><div class="num">2</div><div class="lbl">Item needs a fix</div></div>
+      <div class="section-num"><div class="num">3</div><div class="lbl">Item needs a fix</div></div>
       <div class="issue-card animate-in">
         <div class="issue-card-head">
           <span class="issue-card-title">⚠ Clearance item — delivery unavailable</span>
@@ -672,7 +808,67 @@ body {
       </div>
     </div>
 
-    <!-- D. CONTACT DETAILS -->
+    <!-- E. SIGN IN / GUEST — shown after issue resolved (v2.7 moved v2.8) -->
+    <div class="account-block animate-in hidden" id="account-block">
+      <div class="account-block-head">
+        <span class="account-block-title">Sign in or continue as guest</span>
+        <span class="account-block-points">
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Earn <strong id="loyalty-pts">338</strong> points on this order
+        </span>
+      </div>
+      <div class="account-block-body">
+
+        <!-- Left: Sign in -->
+        <div class="account-col">
+          <div class="account-col-label">Returning customer?</div>
+          <div class="account-col-sub">Sign in to use saved details and collect Jaycar rewards points on this order.</div>
+          <button class="btn btn-navy btn-sm" id="signin-btn" onclick="toggleSignIn()" style="width:100%;justify-content:center;">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Sign in
+          </button>
+        </div>
+
+        <!-- Divider -->
+        <div class="account-col-divider"></div>
+
+        <!-- Right: Guest -->
+        <div class="account-col">
+          <div class="account-col-label">Guest checkout</div>
+          <div class="account-col-sub">Fastest path. You can still create an account after purchase.</div>
+          <button class="btn btn-primary btn-sm" onclick="continueAsGuest()" style="width:100%;justify-content:center;">
+            Continue as guest
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Sign-in expansion panel (hidden until "Sign in" clicked) -->
+      <div class="signin-panel" id="signin-panel">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;">
+          <div class="form-group">
+            <label class="form-label" for="signin-email">Email address</label>
+            <input class="form-input" type="email" id="signin-email" placeholder="you@example.com" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="signin-password">Password</label>
+            <input class="form-input" type="password" id="signin-password" placeholder="••••••••" autocomplete="current-password">
+          </div>
+        </div>
+        <div class="signin-panel-actions">
+          <button class="btn btn-navy btn-sm" onclick="handleSignIn()" style="min-width:120px;">Sign in</button>
+          <button class="btn btn-ghost btn-sm" onclick="toggleSignIn()">Cancel</button>
+          <span class="signin-forgot" onclick="handleForgot()">Forgot password?</span>
+        </div>
+        <div class="signin-separator">or sign in with</div>
+        <button class="signin-sso-btn" onclick="handleSSO('google')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+          Continue with Google
+        </button>
+      </div>
+    </div>
+
+    <!-- F. CONTACT DETAILS -->
     <div id="contact-section">
       <div class="locked-section" id="contact-lock">
         <div class="lock-icon-wrap">
@@ -685,13 +881,22 @@ body {
       </div>
 
       <div class="hidden" id="contact-form">
-        <div class="section-num" style="margin-bottom:12px;"><div class="num">3</div><div class="lbl">Your contact details</div></div>
+        <div class="section-num" style="margin-bottom:12px;"><div class="num">4</div><div class="lbl">Your contact details</div></div>
         <div class="card animate-in">
           <div class="card-head"><span class="card-head-title">Contact</span></div>
           <div class="card-body">
             <div class="form-group">
-              <label class="form-label" for="email">Email address</label>
-              <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
+              <label class="form-label" for="email" style="display:flex;align-items:center;justify-content:space-between;">
+                Email address
+                <span style="font-size:10.5px;font-weight:600;color:var(--txt-muted);text-transform:none;letter-spacing:0;">
+                  Already have an account? <a style="color:var(--cyan);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="scrollToSignIn()">Sign in</a>
+                </span>
+              </label>
+              <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" onblur="checkEmailRecognition(this.value)">
+              <div class="email-recognition" id="email-recognition">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#009FE3" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span>Looks like you have an account — <a onclick="scrollToSignIn()">sign in to collect your points and use saved details</a></span>
+              </div>
             </div>
             <div class="form-row">
               <div class="form-group">
@@ -751,7 +956,7 @@ body {
       </div>
     </div>
 
-    <!-- E. PAYMENT -->
+    <!-- F. PAYMENT -->
     <div id="payment-section" style="margin-top:16px;">
       <div class="locked-section" id="payment-lock">
         <div class="lock-icon-wrap">
@@ -764,7 +969,7 @@ body {
       </div>
 
       <div class="hidden" id="payment-form">
-        <div class="section-num" style="margin-bottom:12px;"><div class="num">4</div><div class="lbl">Payment</div></div>
+        <div class="section-num" style="margin-bottom:12px;"><div class="num">5</div><div class="lbl">Payment</div></div>
         <div class="card animate-in">
           <div class="card-head"><span class="card-head-title">Choose payment method</span></div>
           <div class="card-body">
@@ -833,6 +1038,13 @@ body {
         <span class="summary-head-count" id="item-count">6 items</span>
       </div>
       <div class="summary-body">
+
+        <!-- Loyalty nudge -->
+        <div class="loyalty-nudge" id="loyalty-nudge">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="#a07800" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          <span>Sign in to earn <span class="nudge-pts">338 points</span> on this order</span>
+          <a onclick="scrollToSignIn()">Sign in</a>
+        </div>
 
         <div class="fulfilment-pill pill-collect" id="fulfilment-pill">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
@@ -1172,6 +1384,7 @@ body {
     document.getElementById('resolved-banner').classList.remove('hidden');
     document.getElementById('resolved-title').textContent = title;
     document.getElementById('resolved-sub').textContent = sub;
+    document.getElementById('account-block').classList.remove('hidden');
     document.getElementById('contact-lock').classList.add('hidden');
     document.getElementById('contact-form').classList.remove('hidden');
     document.getElementById('payment-lock').classList.add('hidden');
@@ -1223,6 +1436,101 @@ body {
       btn.style.opacity = '1';
     }, 1600);
   }
+
+  // ── ACCOUNT / LOYALTY BLOCK (v2.7) ────────────────────────────────────────
+  let signinOpen = false;
+  let guestChosen = false;
+
+  function toggleSignIn() {
+    signinOpen = !signinOpen;
+    const panel = document.getElementById('signin-panel');
+    const btn   = document.getElementById('signin-btn');
+    panel.classList.toggle('open', signinOpen);
+    btn.textContent = signinOpen ? '✕  Cancel' : '  Sign in';
+    if (signinOpen) {
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Cancel';
+      setTimeout(() => document.getElementById('signin-email').focus(), 80);
+    } else {
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Sign in';
+    }
+  }
+
+  function continueAsGuest() {
+    guestChosen = true;
+    const block = document.getElementById('account-block');
+    // Collapse to a slim confirmed state
+    block.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(0,159,227,0.06);border:1px solid rgba(0,159,227,0.2);border-radius:4px;font-family:var(--font);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#009FE3" stroke-width="1.4"/><path d="M5 8l2.5 2.5L11 6" stroke="#009FE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:13px;font-weight:600;color:var(--navy);">Continuing as guest</span>
+        <button onclick="resetAccountBlock()" style="margin-left:auto;background:none;border:none;font-size:11px;font-weight:700;color:var(--txt-muted);cursor:pointer;font-family:var(--font);text-decoration:underline;">Change</button>
+      </div>`;
+    // Hide loyalty nudge in summary
+    const nudge = document.getElementById('loyalty-nudge');
+    if (nudge) nudge.style.display = 'none';
+  }
+
+  function resetAccountBlock() {
+    guestChosen = false;
+    location.reload(); // simplest way to reset the whole block
+  }
+
+  function handleSignIn() {
+    const email = document.getElementById('signin-email').value.trim();
+    const pass  = document.getElementById('signin-password').value.trim();
+    if (!email || !pass) {
+      document.getElementById('signin-password').style.borderColor = 'var(--sale-red)';
+      return;
+    }
+    // Mock: collapse to signed-in state
+    const block = document.getElementById('account-block');
+    block.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(12,37,76,0.04);border:1px solid rgba(12,37,76,0.14);border-radius:4px;font-family:var(--font);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#0C254C" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span style="font-size:13px;font-weight:600;color:var(--navy);">Signed in as <strong>${email}</strong></span>
+        <span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:rgba(246,193,0,0.15);border:1px solid rgba(246,193,0,0.3);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:700;color:#a07800;font-family:var(--font);">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          338 points on this order
+        </span>
+      </div>`;
+    // Update loyalty nudge in summary to confirmed
+    const nudge = document.getElementById('loyalty-nudge');
+    if (nudge) {
+      nudge.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#a07800" stroke-width="1.3"/><path d="M5 8l2.5 2.5L11 6" stroke="#a07800" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>You'll earn <span class="nudge-pts">338 points</span> on this order</span>`;
+    }
+    // Pre-fill email in contact form
+    const contactEmail = document.getElementById('email');
+    if (contactEmail) contactEmail.value = email;
+  }
+
+  function handleForgot() {
+    alert('Password reset link sent — check your email. (stub)');
+  }
+
+  function handleSSO(provider) {
+    alert('Redirecting to ' + provider + ' sign-in… (stub)');
+  }
+
+  function scrollToSignIn() {
+    const block = document.getElementById('account-block');
+    if (block) {
+      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        if (!signinOpen) toggleSignIn();
+      }, 400);
+    }
+  }
+
+  // Email recognition — show hint for any email that looks real
+  function checkEmailRecognition(val) {
+    const el = document.getElementById('email-recognition');
+    if (!el) return;
+    const hasAt = val.includes('@') && val.includes('.');
+    el.classList.toggle('show', hasAt && !guestChosen);
+  }
+
 </script>
 </body>
 </html>
