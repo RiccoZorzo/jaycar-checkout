@@ -1,54 +1,93 @@
+<!--
+=============================================================
+  JAYCAR CHECKOUT — VERSION HISTORY
+=============================================================
+  v1.0.0 | 2026-04-17 | Initial build
+    - Single-page checkout (no multi-step loading)
+    - Jaycar navy + orange branding
+    - Express checkout: GPay, PayPal, Afterpay
+    - Contact, delivery address, shipping options, payment
+    - Tabbed payment: card, Zip, Latitude, gift card
+    - Card number auto-format + brand detection
+    - Live shipping cost updates on selection
+    - Sticky order summary sidebar
+    - Free shipping progress bar
+    - Mobile responsive (stacked layout < 768px)
+    - DM Sans + DM Mono typefaces
+
+  v1.1.0 | 2026-04-17 | Version control + tooltip
+    - Added version history comment block (this block)
+    - Added version tooltip on logo hover in header
+    - Added meta version tag for programmatic reads
+    - No functional checkout changes
+
+  v1.2.0 | 2026-04-20 | Brand style guide applied
+    - Colours updated to exact brand HEX values:
+        Navy #0C254C, Orange #F68b22, Teal #56BFC9
+    - Approved colour combos enforced (orange-on-navy REMOVED)
+    - Typography: Nunito Sans (Avenir-equivalent via Google Fonts)
+    - JUST ASK jaycar logo lockup rebuilt to match brand assets
+    - Progress bar: teal bottom border + teal completed steps
+    - Active step indicator: navy text on orange (brand-approved)
+    - Shipping badge: teal bg + navy text (brand-approved)
+    - CTA button: orange bg + navy text (brand-approved)
+    - Confirm state: teal bg + navy text (brand-approved)
+    - Aside header: navy bg + white text + teal accent border
+    - Free shipping bar: teal fill + teal-tinted bg
+    - Block headers: navy bg + white title + teal action text
+    - Focus states: teal border + teal glow ring
+    - Version tooltip badge: teal bg + navy text
+    - Tech doc updated with v1.2.0 entry
+=============================================================
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="version" content="1.2.0">
+<meta name="last-updated" content="2026-04-20">
 <title>Checkout — Jaycar Electronics</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,400;0,6..12,600;0,6..12,700;0,6..12,800;1,6..12,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --navy: #0f1b2d;
-    --navy-mid: #1a2d45;
-    --navy-light: #243d5c;
-    --orange: #f47b20;
-    --orange-hover: #e06a10;
-    --white: #ffffff;
-    --off-white: #f8f7f4;
-    --border: rgba(255,255,255,0.08);
-    --border-light: #e2e0da;
-    --text-primary: #0f1b2d;
-    --text-secondary: #5a6472;
-    --text-muted: #8e97a3;
-    --surface: #ffffff;
-    --surface-alt: #f8f7f4;
-    --input-border: #d4d0c8;
-    --input-focus: #0f1b2d;
-    --radius: 6px;
-    --radius-lg: 10px;
-    --success: #2e7d32;
-    --success-bg: #e8f5e9;
-    --info-bg: #e3f2fd;
-    --info: #1565c0;
+    --navy:       #0C254C;
+    --navy-mid:   #112d5c;
+    --navy-light: #1a3d6e;
+    --orange:     #F68b22;
+    --orange-dk:  #d97510;
+    --teal:       #56BFC9;
+    --teal-dk:    #3da8b3;
+    --white:      #FFFFFF;
+    --off-white:  #f4f6f9;
+    --border:     #dde0e8;
+    --border-mid: #c5c9d6;
+    --txt-navy:   #0C254C;
+    --txt-mid:    #4a5568;
+    --txt-muted:  #8492a6;
+    --surface:    #ffffff;
+    --radius:     6px;
+    --radius-lg:  10px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
     background: var(--off-white);
-    color: var(--text-primary);
+    color: var(--txt-navy);
     font-size: 15px;
-    line-height: 1.5;
+    line-height: 1.55;
     -webkit-font-smoothing: antialiased;
   }
 
-  /* ── HEADER ── */
+  /* HEADER */
   .site-header {
     background: var(--navy);
     padding: 0 2rem;
-    height: 56px;
+    height: 62px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -57,179 +96,240 @@
     z-index: 100;
   }
 
-  .logo {
+  /* LOGO */
+  .logo-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: default;
+    user-select: none;
+  }
+
+  .logo-lockup {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+    gap: 1px;
+  }
+
+  .logo-just-ask {
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.2em;
+    color: var(--white);
+    text-transform: uppercase;
+    padding-left: 13px;
+  }
+
+  .logo-jaycar-row {
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .logo-dot-mark {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-top: 4px;
+    margin-right: 5px;
+    flex-shrink: 0;
+  }
+
+  .logo-jaycar-text {
+    font-size: 27px;
+    font-weight: 800;
+    color: var(--white);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  /* VERSION TOOLTIP */
+  .version-tooltip {
+    position: absolute;
+    top: calc(100% + 14px);
+    left: 0;
+    background: var(--navy-light);
+    border: 0.5px solid rgba(255,255,255,0.12);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    min-width: 250px;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+    z-index: 200;
+  }
+
+  .logo-wrap:hover .version-tooltip { opacity: 1; transform: translateY(0); }
+
+  .version-tooltip::before {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: 14px;
+    width: 8px;
+    height: 8px;
+    background: var(--navy-light);
+    border-left: 0.5px solid rgba(255,255,255,0.12);
+    border-top: 0.5px solid rgba(255,255,255,0.12);
+    transform: rotate(45deg);
+  }
+
+  .vt-row {
     display: flex;
     align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    color: var(--white);
+    justify-content: space-between;
+    gap: 20px;
+    font-size: 12px;
+    margin-bottom: 5px;
   }
 
-  .logo-wordmark {
-    font-size: 20px;
-    font-weight: 600;
-    letter-spacing: -0.5px;
-    color: var(--white);
+  .vt-row:last-child { margin-bottom: 0; }
+  .vt-label { color: rgba(255,255,255,0.42); white-space: nowrap; }
+  .vt-value { color: var(--white); font-family: 'DM Mono', monospace; font-size: 11px; }
+
+  .vt-badge {
+    background: var(--teal);
+    color: var(--navy);
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
   }
 
-  .logo-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--orange);
-    margin-left: 1px;
-    vertical-align: super;
-  }
+  .vt-divider { height: 0.5px; background: rgba(255,255,255,0.1); margin: 7px 0; }
 
   .header-secure {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 12px;
+    font-weight: 700;
     color: rgba(255,255,255,0.5);
+    letter-spacing: 0.02em;
   }
 
-  .lock-icon {
-    width: 14px;
-    height: 14px;
-    opacity: 0.5;
-  }
-
-  /* ── PROGRESS ── */
+  /* PROGRESS BAR */
   .checkout-progress {
     background: var(--navy-mid);
     padding: 0 2rem;
     display: flex;
     align-items: center;
-    height: 42px;
-    gap: 0;
-    overflow: hidden;
+    height: 46px;
+    border-bottom: 3px solid var(--teal);
   }
 
   .progress-step {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(255,255,255,0.38);
     white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
   }
 
   .progress-step.active { color: var(--white); }
-  .progress-step.done { color: var(--orange); }
+  .progress-step.done   { color: var(--teal); }
 
-  .progress-step .step-num {
-    width: 20px;
-    height: 20px;
+  .step-num {
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
     border: 1.5px solid currentColor;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 10px;
+    font-weight: 800;
     flex-shrink: 0;
   }
 
-  .progress-step.done .step-num {
-    background: var(--orange);
-    border-color: var(--orange);
-    color: white;
-  }
+  .progress-step.done .step-num   { background: var(--teal); border-color: var(--teal); color: var(--navy); }
+  .progress-step.active .step-num { background: var(--orange); border-color: var(--orange); color: var(--navy); }
 
-  .progress-divider {
-    width: 32px;
-    height: 1px;
-    background: rgba(255,255,255,0.15);
-    margin: 0 8px;
-    flex-shrink: 0;
-  }
+  .progress-divider { width: 28px; height: 1px; background: rgba(255,255,255,0.18); margin: 0 10px; flex-shrink: 0; }
 
-  /* ── LAYOUT ── */
+  /* LAYOUT */
   .checkout-layout {
-    max-width: 1080px;
+    max-width: 1100px;
     margin: 0 auto;
     display: grid;
-    grid-template-columns: 1fr 360px;
-    gap: 0;
-    min-height: calc(100vh - 98px);
+    grid-template-columns: 1fr 375px;
     align-items: start;
   }
 
-  .checkout-main {
-    padding: 2rem 2.5rem 4rem 2rem;
-  }
+  .checkout-main  { padding: 2rem 2.5rem 4rem 1.5rem; }
+  .checkout-aside { padding: 2rem 1.5rem 4rem 2rem; position: sticky; top: 108px; }
 
-  .checkout-aside {
-    padding: 2rem 1.5rem 4rem 2rem;
-    position: sticky;
-    top: 98px;
-  }
-
-  /* ── SECTION BLOCKS ── */
+  /* FORM BLOCKS */
   .form-block {
     background: var(--surface);
-    border: 0.5px solid var(--border-light);
+    border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     overflow: hidden;
-    transition: box-shadow 0.2s;
+    transition: border-color 0.15s;
+    animation: fadeUp 0.3s ease both;
   }
 
-  .form-block:focus-within {
-    box-shadow: 0 0 0 2px rgba(15,27,45,0.08);
+  .form-block:nth-child(1) { animation-delay: 0.04s; }
+  .form-block:nth-child(2) { animation-delay: 0.08s; }
+  .form-block:nth-child(3) { animation-delay: 0.12s; }
+  .form-block:nth-child(4) { animation-delay: 0.16s; }
+  .form-block:focus-within { border-color: var(--teal); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(7px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
 
   .block-header {
-    padding: 16px 20px;
+    padding: 13px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 0.5px solid var(--border-light);
-    background: var(--surface);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: var(--navy);
   }
 
   .block-title {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 10.5px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.07em;
-    color: var(--navy);
+    letter-spacing: 0.12em;
+    color: var(--white);
   }
 
   .block-action {
-    font-size: 13px;
-    color: var(--orange);
-    text-decoration: none;
+    font-size: 12px;
+    color: var(--teal);
     cursor: pointer;
-    font-weight: 500;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
-  .block-body {
-    padding: 20px;
-  }
+  .block-body { padding: 20px; }
 
-  /* ── EXPRESS CHECKOUT ── */
-  .express-section {
-    margin-bottom: 24px;
-  }
+  /* EXPRESS */
+  .express-wrap { margin-bottom: 20px; }
 
   .express-label {
-    font-size: 11px;
-    font-weight: 600;
+    font-size: 10px;
+    font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--text-muted);
+    letter-spacing: 0.14em;
+    color: var(--txt-muted);
     text-align: center;
     margin-bottom: 12px;
   }
 
-  .express-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-  }
+  .express-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
 
   .express-btn {
     height: 48px;
@@ -238,95 +338,59 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    border: 1px solid var(--border-light);
-    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border);
+    font-family: 'Nunito Sans', sans-serif;
     font-size: 13px;
-    font-weight: 600;
-    transition: transform 0.1s, opacity 0.1s;
-    user-select: none;
+    font-weight: 800;
+    transition: opacity 0.15s, transform 0.1s;
   }
 
+  .express-btn:hover  { opacity: 0.85; }
   .express-btn:active { transform: scale(0.97); }
 
-  .btn-gpay {
-    background: #000;
-    color: #fff;
-    border-color: #000;
-    letter-spacing: 0.5px;
-  }
-
-  .btn-gpay:hover { background: #1a1a1a; }
-
-  .btn-paypal {
-    background: #ffc439;
-    color: #003087;
-    border-color: #ffc439;
-    font-weight: 700;
-    font-size: 14px;
-    font-style: italic;
-  }
-
-  .btn-paypal:hover { background: #f0b429; }
-
-  .btn-afterpay {
-    background: #b2fce4;
-    color: #000;
-    border-color: #b2fce4;
-    font-size: 12px;
-    letter-spacing: -0.3px;
-  }
-
-  .btn-afterpay:hover { background: #9ff0d4; }
+  .btn-gpay     { background: #000; color: #fff; border-color: #000; letter-spacing: 0.04em; }
+  .btn-paypal   { background: #ffc439; color: #003087; border-color: #ffc439; font-size: 14px; font-style: italic; }
+  .btn-afterpay { background: #b2fce4; color: #000; border-color: #b2fce4; font-size: 12px; }
 
   .or-divider {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin: 20px 0;
-    color: var(--text-muted);
-    font-size: 12px;
+    margin: 18px 0;
+    color: var(--txt-muted);
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
   }
 
-  .or-divider::before,
-  .or-divider::after {
-    content: '';
-    flex: 1;
-    height: 0.5px;
-    background: var(--border-light);
-  }
+  .or-divider::before, .or-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--border); }
 
-  /* ── FORM ELEMENTS ── */
-  .form-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-  }
-
-  .form-group {
-    margin-bottom: 14px;
-  }
-
+  /* FORMS */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 14px; }
   .form-group:last-child { margin-bottom: 0; }
 
   .form-label {
     display: block;
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--text-secondary);
+    font-size: 10.5px;
+    font-weight: 800;
+    color: var(--txt-navy);
     margin-bottom: 6px;
-    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
   }
 
-  .form-input,
-  .form-select {
+  .form-input, .form-select {
     width: 100%;
-    height: 42px;
-    border: 1px solid var(--input-border);
+    height: 44px;
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
     padding: 0 12px;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
     font-size: 14px;
-    color: var(--text-primary);
+    font-weight: 600;
+    color: var(--txt-navy);
     background: var(--surface);
     outline: none;
     transition: border-color 0.15s, box-shadow 0.15s;
@@ -334,200 +398,117 @@
     -webkit-appearance: none;
   }
 
-  .form-input::placeholder { color: var(--text-muted); }
+  .form-input::placeholder { color: var(--txt-muted); font-weight: 400; }
 
-  .form-input:focus,
-  .form-select:focus {
-    border-color: var(--navy);
-    box-shadow: 0 0 0 3px rgba(15,27,45,0.07);
+  .form-input:focus, .form-select:focus {
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(86,191,201,0.18);
   }
 
   .form-select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235a6472' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230C254C' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: right 12px center;
-    padding-right: 32px;
+    padding-right: 34px;
     cursor: pointer;
   }
 
-  .input-with-flag {
-    position: relative;
-  }
+  .input-with-flag { position: relative; }
+  .input-flag { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+  .input-with-flag .form-input { padding-left: 36px; }
 
-  .input-flag {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    pointer-events: none;
-  }
-
-  .input-with-flag .form-input {
-    padding-left: 36px;
-  }
-
-  /* ── DELIVERY OPTIONS ── */
-  .delivery-options {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
+  /* DELIVERY */
+  .delivery-options { display: flex; flex-direction: column; gap: 8px; }
 
   .delivery-opt {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 14px 16px;
-    border: 1px solid var(--border-light);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
     cursor: pointer;
-    transition: border-color 0.15s, background 0.15s;
+    transition: border-color 0.15s, background 0.1s;
     background: var(--surface);
     user-select: none;
   }
 
-  .delivery-opt:hover { background: var(--off-white); }
+  .delivery-opt:hover { background: #edf8f9; border-color: var(--teal); }
+  .delivery-opt.active { border-color: var(--teal); border-width: 2px; background: #edf8f9; }
 
-  .delivery-opt.active {
-    border-color: var(--navy);
-    border-width: 1.5px;
-    background: #f0f3f7;
-  }
+  .delivery-opt input[type="radio"] { width: 16px; height: 16px; accent-color: var(--teal); flex-shrink: 0; }
 
-  .delivery-opt input[type="radio"] {
-    width: 16px;
-    height: 16px;
-    accent-color: var(--navy);
-    flex-shrink: 0;
-    cursor: pointer;
-  }
-
-  .do-info { flex: 1; }
-
-  .do-name {
-    font-size: 14px;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .do-sub {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 3px;
-  }
-
-  .do-price {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--navy);
-    font-family: 'DM Mono', monospace;
-    flex-shrink: 0;
-  }
+  .do-info  { flex: 1; }
+  .do-name  { font-size: 14px; font-weight: 700; color: var(--navy); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .do-sub   { font-size: 12px; color: var(--txt-mid); margin-top: 2px; font-weight: 600; }
+  .do-price { font-size: 15px; font-weight: 800; color: var(--navy); font-family: 'DM Mono', monospace; flex-shrink: 0; }
 
   .badge {
     display: inline-flex;
     align-items: center;
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 7px;
+    font-size: 9.5px;
+    font-weight: 800;
+    padding: 2px 8px;
     border-radius: 20px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
 
-  .badge-fastest { background: #fff3e0; color: #e65100; }
-  .badge-free { background: var(--success-bg); color: var(--success); }
-  .badge-info { background: var(--info-bg); color: var(--info); }
+  .badge-fastest { background: var(--orange); color: var(--navy); }
+  .badge-free    { background: var(--teal);   color: var(--navy); }
 
-  /* ── PAYMENT ── */
-  .payment-methods-row {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-  }
+  /* PAYMENT */
+  .payment-tabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
 
-  .pay-method-tab {
+  .pay-tab {
     height: 36px;
     padding: 0 14px;
-    border: 1px solid var(--border-light);
+    border: 1.5px solid var(--border);
     border-radius: var(--radius);
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px;
+    font-weight: 800;
     cursor: pointer;
     background: var(--surface);
-    color: var(--text-secondary);
+    color: var(--txt-mid);
     transition: all 0.15s;
-    font-family: 'DM Sans', sans-serif;
+    font-family: 'Nunito Sans', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
-  .pay-method-tab.active {
-    background: var(--navy);
-    color: var(--white);
-    border-color: var(--navy);
-  }
+  .pay-tab.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+  .pay-tab:hover:not(.active) { border-color: var(--teal); color: var(--navy); }
 
-  .pay-method-tab:hover:not(.active) { background: var(--off-white); }
+  .card-icons { display: flex; gap: 6px; margin-bottom: 16px; }
 
-  .card-brand-icons {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 16px;
-    align-items: center;
-  }
-
-  .card-brand {
+  .card-icon {
     height: 24px;
     width: 38px;
-    border: 0.5px solid var(--border-light);
+    border: 1px solid var(--border);
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 10px;
-    font-weight: 700;
-    color: var(--text-muted);
+    font-weight: 800;
     background: var(--surface);
   }
 
-  .card-brand.visa { color: #1a1f71; }
-  .card-brand.mc { background: linear-gradient(90deg,#eb001b 40%,#f79e1b 60%); color: transparent; font-size: 0; border-radius: 4px; }
+  .input-card { position: relative; }
+  .input-card .form-input { padding-right: 60px; font-family: 'DM Mono', monospace; letter-spacing: 0.04em; }
+  .card-type { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 11px; font-weight: 800; color: var(--txt-muted); }
 
-  .input-card {
-    position: relative;
-  }
-
-  .input-card .form-input {
-    padding-right: 56px;
-    font-family: 'DM Mono', monospace;
-    letter-spacing: 0.05em;
-  }
-
-  .card-type-badge {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-  }
-
-  /* ── CTA ── */
+  /* CTA */
   .place-order-btn {
     width: 100%;
-    height: 54px;
+    height: 56px;
     background: var(--orange);
-    color: var(--white);
+    color: var(--navy);
     border: none;
     border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 16px;
-    font-weight: 600;
+    font-family: 'Nunito Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 800;
     cursor: pointer;
     transition: background 0.15s, transform 0.1s;
     display: flex;
@@ -535,316 +516,149 @@
     justify-content: center;
     gap: 8px;
     margin-top: 20px;
-    letter-spacing: -0.2px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
   }
 
-  .place-order-btn:hover { background: var(--orange-hover); }
+  .place-order-btn:hover  { background: var(--orange-dk); }
   .place-order-btn:active { transform: scale(0.99); }
 
-  .trust-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
+  .trust-row { display: flex; align-items: center; justify-content: center; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
 
-  .trust-item {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
+  .trust-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--txt-muted); font-weight: 700; }
+  .trust-item svg { color: var(--teal); }
 
-  /* ── ORDER SUMMARY ASIDE ── */
-  .aside-card {
-    background: var(--surface);
-    border: 0.5px solid var(--border-light);
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-  }
+  /* ASIDE */
+  .aside-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
 
-  .aside-header {
-    background: var(--navy);
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .aside-header-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--white);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .aside-header-count {
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-  }
+  .aside-header { background: var(--navy); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--teal); }
+  .aside-header-title { font-size: 10.5px; font-weight: 800; color: var(--white); text-transform: uppercase; letter-spacing: 0.12em; }
+  .aside-header-count { font-size: 11px; color: var(--teal); font-weight: 800; }
 
   .aside-body { padding: 16px 18px; }
 
-  .cart-item {
-    display: flex;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 0.5px solid var(--border-light);
-  }
-
+  .cart-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
   .cart-item:last-child { border-bottom: none; }
 
   .item-thumb {
-    width: 54px;
-    height: 54px;
+    width: 56px; height: 56px;
     border-radius: var(--radius);
     background: var(--off-white);
-    border: 0.5px solid var(--border-light);
+    border: 1px solid var(--border);
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 10px;
-    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
     position: relative;
-    overflow: hidden;
-  }
-
-  .item-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
   }
 
   .qty-bubble {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--navy);
-    color: var(--white);
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; top: -6px; right: -6px;
+    background: var(--navy); color: var(--white);
+    width: 19px; height: 19px; border-radius: 50%;
+    font-size: 10px; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
   }
 
   .item-details { flex: 1; min-width: 0; }
+  .item-name { font-size: 13px; font-weight: 700; line-height: 1.35; color: var(--txt-navy); }
+  .item-cat  { font-size: 11px; color: var(--txt-muted); font-family: 'DM Mono', monospace; margin-top: 3px; }
+  .item-price { font-size: 14px; font-weight: 800; color: var(--navy); font-family: 'DM Mono', monospace; flex-shrink: 0; }
 
-  .item-name {
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 1.35;
-    color: var(--text-primary);
-  }
-
-  .item-cat {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-family: 'DM Mono', monospace;
-    margin-top: 3px;
-  }
-
-  .item-price {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--navy);
-    font-family: 'DM Mono', monospace;
-    flex-shrink: 0;
-  }
-
-  /* ── VOUCHER ── */
-  .voucher-row {
-    display: flex;
-    gap: 8px;
-    margin: 14px 0;
-  }
+  /* VOUCHER */
+  .voucher-row { display: flex; gap: 8px; margin: 14px 0; }
 
   .voucher-input {
-    flex: 1;
-    height: 38px;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
+    flex: 1; height: 40px;
+    border: 1.5px solid var(--border); border-radius: var(--radius);
     padding: 0 12px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    color: var(--text-primary);
-    background: var(--off-white);
-    outline: none;
+    font-family: 'Nunito Sans', sans-serif; font-size: 13px; font-weight: 600;
+    color: var(--txt-navy); background: var(--off-white); outline: none;
     transition: border-color 0.15s;
   }
 
-  .voucher-input:focus { border-color: var(--navy); background: var(--surface); }
-  .voucher-input::placeholder { color: var(--text-muted); }
+  .voucher-input:focus { border-color: var(--teal); background: var(--surface); }
+  .voucher-input::placeholder { color: var(--txt-muted); font-weight: 400; }
 
   .voucher-btn {
-    height: 38px;
-    padding: 0 14px;
-    border: 1px solid var(--border-light);
-    border-radius: var(--radius);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    background: var(--surface);
-    color: var(--text-primary);
+    height: 40px; padding: 0 16px;
+    border: 1.5px solid var(--navy); border-radius: var(--radius);
+    font-family: 'Nunito Sans', sans-serif; font-size: 11px; font-weight: 800;
+    cursor: pointer; background: var(--navy); color: var(--white);
     transition: background 0.15s;
+    text-transform: uppercase; letter-spacing: 0.06em;
   }
 
-  .voucher-btn:hover { background: var(--off-white); }
+  .voucher-btn:hover { background: var(--navy-mid); }
 
-  /* ── FREE SHIP PROGRESS ── */
-  .free-ship-bar {
-    background: var(--off-white);
-    border: 0.5px solid var(--border-light);
-    border-radius: var(--radius);
-    padding: 10px 12px;
-    margin-bottom: 14px;
+  /* FREE SHIP BAR */
+  .free-ship-bar { background: #edf9fa; border: 1px solid rgba(86,191,201,0.28); border-radius: var(--radius); padding: 10px 12px; margin-bottom: 14px; }
+  .free-ship-text { font-size: 12px; color: var(--txt-mid); font-weight: 600; }
+  .free-ship-text strong { color: var(--navy); font-weight: 800; }
+  .progress-track { height: 5px; background: rgba(86,191,201,0.18); border-radius: 3px; margin-top: 8px; overflow: hidden; }
+  .progress-fill  { height: 100%; width: 51%; background: var(--teal); border-radius: 3px; transition: width 0.4s ease; }
+
+  /* TOTALS */
+  .summary-totals { border-top: 1px solid var(--border); padding-top: 14px; }
+
+  .totals-line { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; color: var(--txt-mid); font-weight: 600; }
+  .totals-line .val { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--txt-mid); }
+
+  .totals-line.grand { font-size: 15px; font-weight: 800; color: var(--navy); border-top: 1px solid var(--border); margin-top: 10px; padding-top: 12px; margin-bottom: 0; }
+  .totals-line.grand .val { font-size: 20px; color: var(--navy); font-weight: 700; }
+
+  .totals-line.gst { margin-top: 5px; font-size: 11px; color: var(--txt-muted); margin-bottom: 0; }
+  .totals-line.gst .val { font-size: 11px; color: var(--txt-muted); }
+
+  /* RESPONSIVE */
+  @media (max-width: 780px) {
+    .checkout-layout { grid-template-columns: 1fr; }
+    .checkout-aside  { position: static; padding: 1rem; order: -1; }
+    .checkout-main   { padding: 1rem 1rem 3rem; }
+    .express-grid    { grid-template-columns: 1fr; }
+    .form-row        { grid-template-columns: 1fr; }
+    .checkout-progress { padding: 0 1rem; }
+    .site-header     { padding: 0 1rem; }
   }
 
-  .free-ship-text {
-    font-size: 12px;
-    color: var(--text-secondary);
-  }
-
-  .free-ship-text strong { color: var(--text-primary); }
-
-  .progress-track {
-    height: 4px;
-    background: var(--border-light);
-    border-radius: 2px;
-    margin-top: 7px;
-    overflow: hidden;
-  }
-
-  .progress-fill {
-    height: 100%;
-    width: 51%;
-    background: var(--navy);
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-
-  /* ── SUMMARY TOTALS ── */
-  .summary-totals {
-    border-top: 0.5px solid var(--border-light);
-    padding-top: 14px;
-  }
-
-  .totals-line {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
-    font-size: 13px;
-    color: var(--text-secondary);
-  }
-
-  .totals-line .val {
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-  }
-
-  .totals-line.grand {
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text-primary);
-    border-top: 0.5px solid var(--border-light);
-    margin-top: 10px;
-    padding-top: 12px;
-    margin-bottom: 0;
-  }
-
-  .totals-line.grand .val {
-    font-size: 18px;
-    color: var(--navy);
-  }
-
-  .totals-line.gst {
-    margin-top: 5px;
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-bottom: 0;
-  }
-
-  .totals-line.gst .val { font-size: 11px; }
-
-  /* ── RESPONSIVE ── */
-  @media (max-width: 768px) {
-    .checkout-layout {
-      grid-template-columns: 1fr;
-    }
-
-    .checkout-aside {
-      position: static;
-      padding: 1rem;
-      order: -1;
-    }
-
-    .checkout-main {
-      padding: 1rem 1rem 3rem;
-    }
-
-    .express-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .form-row {
-      grid-template-columns: 1fr;
-    }
-
-    .checkout-progress {
-      padding: 0 1rem;
-    }
-
-    .site-header {
-      padding: 0 1rem;
-    }
-  }
-
-  /* ── ANIMATIONS ── */
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .form-block {
-    animation: fadeIn 0.3s ease both;
-  }
-
-  .form-block:nth-child(1) { animation-delay: 0.05s; }
-  .form-block:nth-child(2) { animation-delay: 0.1s; }
-  .form-block:nth-child(3) { animation-delay: 0.15s; }
-  .form-block:nth-child(4) { animation-delay: 0.2s; }
-
-  /* ── UTILITY ── */
   .hidden { display: none; }
-
-  .contact-meta {
-    font-size: 13px;
-    color: var(--text-secondary);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
 </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <header class="site-header">
-  <a href="/" class="logo">
-    <span class="logo-wordmark">jaycar<span class="logo-dot"></span></span>
-  </a>
+  <div class="logo-wrap">
+    <div class="logo-lockup">
+      <span class="logo-just-ask">Just Ask</span>
+      <div class="logo-jaycar-row">
+        <div class="logo-dot-mark"></div>
+        <span class="logo-jaycar-text">jaycar</span>
+      </div>
+    </div>
+    <div class="version-tooltip" role="tooltip">
+      <div class="vt-row">
+        <span class="vt-label">Version</span>
+        <span class="vt-badge">v1.2.0</span>
+      </div>
+      <div class="vt-row">
+        <span class="vt-label">Released</span>
+        <span class="vt-value">2026-04-20</span>
+      </div>
+      <div class="vt-divider"></div>
+      <div class="vt-row">
+        <span class="vt-label">Latest</span>
+        <span class="vt-value" style="color:rgba(255,255,255,0.75);font-family:'Nunito Sans',sans-serif;text-align:right;max-width:140px">Brand style guide applied</span>
+      </div>
+      <div class="vt-row" style="margin-top:2px">
+        <span class="vt-label">v1.1.0</span>
+        <span class="vt-value" style="color:rgba(255,255,255,0.35);font-family:'Nunito Sans',sans-serif">Version control</span>
+      </div>
+      <div class="vt-row">
+        <span class="vt-label">v1.0.0</span>
+        <span class="vt-value" style="color:rgba(255,255,255,0.22);font-family:'Nunito Sans',sans-serif">Initial build</span>
+      </div>
+    </div>
+  </div>
   <div class="header-secure">
-    <svg class="lock-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
       <rect x="2" y="7" width="12" height="8" rx="2" stroke="currentColor" stroke-width="1.5"/>
       <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
@@ -852,57 +666,48 @@
   </div>
 </header>
 
-<!-- PROGRESS BAR -->
 <nav class="checkout-progress" aria-label="Checkout steps">
   <div class="progress-step done">
-    <div class="step-num">✓</div>
-    Cart
+    <div class="step-num">✓</div>Cart
   </div>
   <div class="progress-divider"></div>
   <div class="progress-step active">
-    <div class="step-num">2</div>
-    Checkout
+    <div class="step-num">2</div>Checkout
   </div>
   <div class="progress-divider"></div>
   <div class="progress-step">
-    <div class="step-num">3</div>
-    Confirmation
+    <div class="step-num">3</div>Confirmation
   </div>
 </nav>
 
-<!-- MAIN LAYOUT -->
 <div class="checkout-layout">
 
-  <!-- LEFT COLUMN: FORM -->
   <main class="checkout-main">
 
-    <!-- EXPRESS CHECKOUT -->
-    <div class="express-section">
+    <div class="express-wrap">
       <div class="express-label">Express checkout</div>
       <div class="express-grid">
-        <button class="express-btn btn-gpay" aria-label="Pay with Google Pay">G Pay</button>
-        <button class="express-btn btn-paypal" aria-label="Pay with PayPal">PayPal</button>
-        <button class="express-btn btn-afterpay" aria-label="Pay with Afterpay">afterpay›</button>
+        <button class="express-btn btn-gpay">G Pay</button>
+        <button class="express-btn btn-paypal">PayPal</button>
+        <button class="express-btn btn-afterpay">afterpay›</button>
       </div>
     </div>
 
-    <div class="or-divider">or enter details below</div>
+    <div class="or-divider">or fill in your details</div>
 
-    <!-- CONTACT -->
     <div class="form-block">
       <div class="block-header">
         <span class="block-title">Contact</span>
-        <span class="block-action" onclick="alert('Sign in flow')">Sign in</span>
+        <span class="block-action">Sign in</span>
       </div>
       <div class="block-body">
         <div class="form-group">
           <label class="form-label" for="email">Email address</label>
-          <input class="form-input" type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+          <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email">
         </div>
       </div>
     </div>
 
-    <!-- DELIVERY ADDRESS -->
     <div class="form-block">
       <div class="block-header">
         <span class="block-title">Delivery address</span>
@@ -910,93 +715,79 @@
       <div class="block-body">
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label" for="first-name">First name</label>
-            <input class="form-input" type="text" id="first-name" name="first-name" placeholder="First" autocomplete="given-name">
+            <label class="form-label" for="fname">First name</label>
+            <input class="form-input" type="text" id="fname" placeholder="First" autocomplete="given-name">
           </div>
           <div class="form-group">
-            <label class="form-label" for="last-name">Last name</label>
-            <input class="form-input" type="text" id="last-name" name="last-name" placeholder="Last" autocomplete="family-name">
+            <label class="form-label" for="lname">Last name</label>
+            <input class="form-input" type="text" id="lname" placeholder="Last" autocomplete="family-name">
           </div>
         </div>
         <div class="form-group">
-          <label class="form-label" for="company">Company name <span style="font-weight:400;color:var(--text-muted)">(optional)</span></label>
-          <input class="form-input" type="text" id="company" name="company" placeholder="Your company" autocomplete="organization">
+          <label class="form-label" for="company">Company <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--txt-muted)">(optional)</span></label>
+          <input class="form-input" type="text" id="company" placeholder="Your company" autocomplete="organization">
         </div>
         <div class="form-group">
           <label class="form-label" for="address">Street address</label>
-          <input class="form-input" type="text" id="address" name="address" placeholder="Start typing your address…" autocomplete="street-address">
+          <input class="form-input" type="text" id="address" placeholder="Start typing your address…" autocomplete="street-address">
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="suburb">Suburb</label>
-            <input class="form-input" type="text" id="suburb" name="suburb" placeholder="Suburb" autocomplete="address-level2">
+            <input class="form-input" type="text" id="suburb" placeholder="Suburb" autocomplete="address-level2">
           </div>
           <div class="form-group">
             <label class="form-label" for="postcode">Postcode</label>
-            <input class="form-input" type="text" id="postcode" name="postcode" placeholder="2000" autocomplete="postal-code" maxlength="4" inputmode="numeric">
+            <input class="form-input" type="text" id="postcode" placeholder="2000" maxlength="4" inputmode="numeric" autocomplete="postal-code">
           </div>
         </div>
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="state">State</label>
-            <select class="form-select" id="state" name="state" autocomplete="address-level1">
+            <select class="form-select" id="state" autocomplete="address-level1">
               <option value="">Select state</option>
-              <option>NSW</option>
-              <option>VIC</option>
-              <option>QLD</option>
-              <option>WA</option>
-              <option>SA</option>
-              <option>TAS</option>
-              <option>ACT</option>
-              <option>NT</option>
+              <option>NSW</option><option>VIC</option><option>QLD</option>
+              <option>WA</option><option>SA</option><option>TAS</option>
+              <option>ACT</option><option>NT</option>
             </select>
           </div>
           <div class="form-group">
-            <label class="form-label" for="phone">Mobile number</label>
+            <label class="form-label" for="phone">Mobile</label>
             <div class="input-with-flag">
               <span class="input-flag">🇦🇺</span>
-              <input class="form-input" type="tel" id="phone" name="phone" placeholder="04xx xxx xxx" autocomplete="tel" inputmode="tel">
+              <input class="form-input" type="tel" id="phone" placeholder="04xx xxx xxx" autocomplete="tel" inputmode="tel">
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- SHIPPING OPTIONS -->
     <div class="form-block">
       <div class="block-header">
         <span class="block-title">Shipping options</span>
       </div>
       <div class="block-body">
         <div class="delivery-options">
-          <label class="delivery-opt active" id="opt-sameday" onclick="selectShipping(this, 14.95, 'Same Day')">
-            <input type="radio" name="shipping" value="sameday" checked>
+          <label class="delivery-opt active" onclick="selectShipping(this,14.95)">
+            <input type="radio" name="ship" checked>
             <div class="do-info">
-              <div class="do-name">
-                Same day delivery
-                <span class="badge badge-fastest">Fastest</span>
-              </div>
+              <div class="do-name">Same day delivery <span class="badge badge-fastest">Fastest</span></div>
               <div class="do-sub">Order before 3pm — delivered today</div>
             </div>
             <div class="do-price">$14.95</div>
           </label>
-
-          <label class="delivery-opt" id="opt-standard" onclick="selectShipping(this, 9.95, 'Standard')">
-            <input type="radio" name="shipping" value="standard">
+          <label class="delivery-opt" onclick="selectShipping(this,9.95)">
+            <input type="radio" name="ship">
             <div class="do-info">
               <div class="do-name">Standard shipping</div>
-              <div class="do-sub">Estimated delivery Wed 22 Apr</div>
+              <div class="do-sub">Estimated Wed 22 Apr</div>
             </div>
             <div class="do-price">$9.95</div>
           </label>
-
-          <label class="delivery-opt" id="opt-collect" onclick="selectShipping(this, 0, 'Click & Collect')">
-            <input type="radio" name="shipping" value="collect">
+          <label class="delivery-opt" onclick="selectShipping(this,0)">
+            <input type="radio" name="ship">
             <div class="do-info">
-              <div class="do-name">
-                Click &amp; collect
-                <span class="badge badge-info">Free</span>
-              </div>
+              <div class="do-name">Click &amp; collect <span class="badge badge-free">Free</span></div>
               <div class="do-sub">Select your nearest Jaycar store</div>
             </div>
             <div class="do-price">Free</div>
@@ -1005,92 +796,87 @@
       </div>
     </div>
 
-    <!-- PAYMENT -->
     <div class="form-block">
       <div class="block-header">
         <span class="block-title">Payment</span>
       </div>
       <div class="block-body">
-        <div class="payment-methods-row">
-          <button class="pay-method-tab active" onclick="switchPayTab(this, 'card')">Credit / Debit card</button>
-          <button class="pay-method-tab" onclick="switchPayTab(this, 'zip')">Zip</button>
-          <button class="pay-method-tab" onclick="switchPayTab(this, 'latitude')">Latitude</button>
-          <button class="pay-method-tab" onclick="switchPayTab(this, 'gift')">Gift card</button>
+        <div class="payment-tabs">
+          <button class="pay-tab active" onclick="switchTab(this,'card')">Card</button>
+          <button class="pay-tab" onclick="switchTab(this,'zip')">Zip</button>
+          <button class="pay-tab" onclick="switchTab(this,'latitude')">Latitude</button>
+          <button class="pay-tab" onclick="switchTab(this,'gift')">Gift card</button>
         </div>
 
         <div id="pay-card">
-          <div class="card-brand-icons">
-            <div class="card-brand visa">VISA</div>
-            <div class="card-brand mc"></div>
-            <div class="card-brand" style="font-size:9px;font-weight:700;color:#2e77bc">AMEX</div>
+          <div class="card-icons">
+            <div class="card-icon" style="color:#1a1f71;font-size:10px;font-weight:800">VISA</div>
+            <div class="card-icon" style="font-size:15px;font-weight:900;color:#eb001b">●<span style="color:#f79e1b;margin-left:-7px">●</span></div>
+            <div class="card-icon" style="font-size:9px;font-weight:800;color:#2e77bc">AMEX</div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="card-num">Card number</label>
+            <label class="form-label" for="cardnum">Card number</label>
             <div class="input-card">
-              <input class="form-input" type="text" id="card-num" name="card-num" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19" autocomplete="cc-number">
-              <span class="card-type-badge" id="card-type-badge"></span>
+              <input class="form-input" type="text" id="cardnum" placeholder="1234 5678 9012 3456" inputmode="numeric" maxlength="19" autocomplete="cc-number">
+              <span class="card-type" id="card-type"></span>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
-              <label class="form-label" for="expiry">Expiry date</label>
-              <input class="form-input" type="text" id="expiry" name="expiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
+              <label class="form-label" for="expiry">Expiry (MM/YY)</label>
+              <input class="form-input" type="text" id="expiry" placeholder="MM / YY" maxlength="7" autocomplete="cc-exp" inputmode="numeric">
             </div>
             <div class="form-group">
               <label class="form-label" for="cvv">Security code</label>
-              <input class="form-input" type="text" id="cvv" name="cvv" placeholder="CVV" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
+              <input class="form-input" type="text" id="cvv" placeholder="CVV" maxlength="4" autocomplete="cc-csc" inputmode="numeric">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label" for="card-name">Name on card</label>
-            <input class="form-input" type="text" id="card-name" name="card-name" placeholder="As it appears on your card" autocomplete="cc-name">
+            <label class="form-label" for="cardname">Name on card</label>
+            <input class="form-input" type="text" id="cardname" placeholder="As it appears on card" autocomplete="cc-name">
           </div>
         </div>
 
         <div id="pay-zip" class="hidden">
-          <p style="font-size:13px;color:var(--text-secondary);padding:12px 0">You'll be redirected to Zip to complete your payment securely.</p>
+          <p style="font-size:13px;color:var(--txt-mid);padding:14px 0;font-weight:600">You'll be redirected to Zip to complete your payment securely.</p>
         </div>
-
         <div id="pay-latitude" class="hidden">
-          <p style="font-size:13px;color:var(--text-secondary);padding:12px 0">You'll be redirected to Latitude Financial to complete your payment.</p>
+          <p style="font-size:13px;color:var(--txt-mid);padding:14px 0;font-weight:600">You'll be redirected to Latitude Financial to complete your payment.</p>
         </div>
-
         <div id="pay-gift" class="hidden">
-          <div class="form-group" style="margin-top:8px">
-            <label class="form-label" for="gift-code">Gift card number</label>
-            <input class="form-input" type="text" id="gift-code" placeholder="Enter gift card number">
+          <div class="form-group" style="margin-top:10px">
+            <label class="form-label" for="giftcode">Gift card number</label>
+            <input class="form-input" type="text" id="giftcode" placeholder="Enter gift card number">
           </div>
           <div class="form-group">
-            <label class="form-label" for="gift-pin">PIN</label>
-            <input class="form-input" type="text" id="gift-pin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric">
+            <label class="form-label" for="giftpin">PIN</label>
+            <input class="form-input" type="text" id="giftpin" placeholder="4-digit PIN" maxlength="4" inputmode="numeric">
           </div>
         </div>
       </div>
     </div>
 
-    <!-- CTA -->
-    <button class="place-order-btn" id="place-order-btn" onclick="handlePlaceOrder()">
+    <button class="place-order-btn" id="place-btn" onclick="handleOrder()">
       Place order &nbsp;·&nbsp; <span id="cta-total">$89.85</span>
     </button>
 
     <div class="trust-row">
       <span class="trust-item">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="1" y="6" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 6V4.5a4 4 0 018 0V6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="1" y="6" width="14" height="9" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M4 6V4.5a4 4 0 018 0V6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
         SSL secured
       </span>
       <span class="trust-item">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 1l1.8 4H14l-3.5 2.6 1.3 4.1L8 9.2 4.2 11.7l1.3-4.1L2 5h4.2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
         Free returns on eligible items
       </span>
       <span class="trust-item">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5v4l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-        <span>1800 022 888</span>
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.3"/><path d="M8 4.5v4l2.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        1800 022 888
       </span>
     </div>
 
   </main>
 
-  <!-- RIGHT COLUMN: ORDER SUMMARY -->
   <aside class="checkout-aside" aria-label="Order summary">
     <div class="aside-card">
       <div class="aside-header">
@@ -1102,7 +888,12 @@
         <div class="cart-item">
           <div class="item-thumb">
             <div class="qty-bubble">1</div>
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="4" y="10" width="20" height="12" rx="3" stroke="#8e97a3" stroke-width="1.5"/><circle cx="9" cy="16" r="2" fill="#8e97a3"/><circle cx="19" cy="16" r="2" fill="#8e97a3"/><path d="M14 10V7" stroke="#8e97a3" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+              <rect x="4" y="11" width="22" height="13" rx="3" stroke="#56BFC9" stroke-width="1.5"/>
+              <circle cx="10" cy="17" r="2.5" fill="#56BFC9"/>
+              <circle cx="20" cy="17" r="2.5" fill="#56BFC9"/>
+              <path d="M15 11V7" stroke="#56BFC9" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
           </div>
           <div class="item-details">
             <div class="item-name">2in1 Portable Split Wireless Speakers 10W IPX6</div>
@@ -1114,7 +905,10 @@
         <div class="cart-item">
           <div class="item-thumb">
             <div class="qty-bubble">1</div>
-            <svg width="28" height="28" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="7" stroke="#8e97a3" stroke-width="1.5"/><circle cx="14" cy="14" r="3" fill="#8e97a3"/></svg>
+            <svg width="30" height="30" viewBox="0 0 30 30" fill="none">
+              <circle cx="15" cy="15" r="8" stroke="#56BFC9" stroke-width="1.5"/>
+              <circle cx="15" cy="15" r="3.5" fill="#56BFC9"/>
+            </svg>
           </div>
           <div class="item-details">
             <div class="item-name">0.71mm Duratech Solder 200gm</div>
@@ -1124,32 +918,20 @@
         </div>
 
         <div class="voucher-row">
-          <input class="voucher-input" type="text" id="voucher" placeholder="Discount code or gift card">
+          <input class="voucher-input" type="text" placeholder="Discount code or gift card">
           <button class="voucher-btn">Apply</button>
         </div>
 
         <div class="free-ship-bar">
           <div class="free-ship-text">Add <strong>$74.11</strong> more for free standard delivery</div>
-          <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+          <div class="progress-track"><div class="progress-fill"></div></div>
         </div>
 
         <div class="summary-totals">
-          <div class="totals-line">
-            <span>Subtotal (2 items)</span>
-            <span class="val">$74.90</span>
-          </div>
-          <div class="totals-line">
-            <span>Shipping</span>
-            <span class="val" id="shipping-display">$14.95</span>
-          </div>
-          <div class="totals-line grand">
-            <span>Grand total</span>
-            <span class="val" id="grand-total-display">$89.85</span>
-          </div>
-          <div class="totals-line gst">
-            <span>Includes GST</span>
-            <span class="val" id="gst-display">$8.17</span>
-          </div>
+          <div class="totals-line"><span>Subtotal (2 items)</span><span class="val">$74.90</span></div>
+          <div class="totals-line"><span>Shipping</span><span class="val" id="ship-display">$14.95</span></div>
+          <div class="totals-line grand"><span>Grand total</span><span class="val" id="grand-display">$89.85</span></div>
+          <div class="totals-line gst"><span>Includes GST</span><span class="val" id="gst-display">$8.17</span></div>
         </div>
 
       </div>
@@ -1159,68 +941,57 @@
 </div>
 
 <script>
-  const SUBTOTAL = 74.90;
+  const SUB = 74.90;
 
-  function selectShipping(el, cost, label) {
+  function selectShipping(el, cost) {
     document.querySelectorAll('.delivery-opt').forEach(o => o.classList.remove('active'));
     el.classList.add('active');
-    el.querySelector('input[type="radio"]').checked = true;
-
-    const ship = cost;
-    const grand = SUBTOTAL + ship;
-    const gst = grand / 11;
-
-    document.getElementById('shipping-display').textContent = ship === 0 ? 'Free' : '$' + ship.toFixed(2);
-    document.getElementById('grand-total-display').textContent = '$' + grand.toFixed(2);
-    document.getElementById('gst-display').textContent = '$' + gst.toFixed(2);
-    document.getElementById('cta-total').textContent = '$' + grand.toFixed(2);
+    el.querySelector('input').checked = true;
+    const grand = SUB + cost;
+    document.getElementById('ship-display').textContent  = cost === 0 ? 'Free' : '$' + cost.toFixed(2);
+    document.getElementById('grand-display').textContent = '$' + grand.toFixed(2);
+    document.getElementById('gst-display').textContent   = '$' + (grand / 11).toFixed(2);
+    document.getElementById('cta-total').textContent     = '$' + grand.toFixed(2);
   }
 
-  function switchPayTab(btn, panel) {
-    document.querySelectorAll('.pay-method-tab').forEach(t => t.classList.remove('active'));
+  function switchTab(btn, panel) {
+    document.querySelectorAll('.pay-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
-    ['pay-card', 'pay-zip', 'pay-latitude', 'pay-gift'].forEach(id => {
-      document.getElementById(id).classList.add('hidden');
-    });
+    ['pay-card','pay-zip','pay-latitude','pay-gift'].forEach(id => document.getElementById(id).classList.add('hidden'));
     document.getElementById('pay-' + panel).classList.remove('hidden');
   }
 
-  // Card number formatting
-  const cardInput = document.getElementById('card-num');
-  if (cardInput) {
-    cardInput.addEventListener('input', function(e) {
-      let val = e.target.value.replace(/\D/g, '').slice(0, 16);
-      e.target.value = val.replace(/(.{4})/g, '$1 ').trim();
-      const badge = document.getElementById('card-type-badge');
-      if (val.startsWith('4')) badge.textContent = 'VISA';
-      else if (val.startsWith('5') || val.startsWith('2')) badge.textContent = 'MC';
-      else if (val.startsWith('3')) badge.textContent = 'AMEX';
-      else badge.textContent = '';
+  const cardEl = document.getElementById('cardnum');
+  if (cardEl) {
+    cardEl.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,16);
+      e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
+      const b = document.getElementById('card-type');
+      b.textContent = v.startsWith('4') ? 'VISA' : /^5[1-5]|^2[2-7]/.test(v) ? 'MC' : v.startsWith('3') ? 'AMEX' : '';
     });
   }
 
-  // Expiry formatting
-  const expiryInput = document.getElementById('expiry');
-  if (expiryInput) {
-    expiryInput.addEventListener('input', function(e) {
-      let val = e.target.value.replace(/\D/g, '').slice(0, 4);
-      if (val.length >= 3) val = val.slice(0, 2) + ' / ' + val.slice(2);
-      e.target.value = val;
+  const expEl = document.getElementById('expiry');
+  if (expEl) {
+    expEl.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,4);
+      if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
+      e.target.value = v;
     });
   }
 
-  function handlePlaceOrder() {
-    const btn = document.getElementById('place-order-btn');
+  function handleOrder() {
+    const btn = document.getElementById('place-btn');
     btn.textContent = 'Processing…';
     btn.style.opacity = '0.7';
     btn.disabled = true;
     setTimeout(() => {
-      btn.textContent = 'Order placed! ✓';
-      btn.style.background = '#2e7d32';
+      btn.innerHTML = 'Order confirmed ✓';
+      btn.style.background = 'var(--teal)';
+      btn.style.color = 'var(--navy)';
       btn.style.opacity = '1';
-    }, 1800);
+    }, 1600);
   }
 </script>
-
 </body>
 </html>
