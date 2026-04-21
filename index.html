@@ -39,6 +39,13 @@
     - [UPDATED] Payment availability now respects basket resolution + account mode + address validity
     - [UPDATED] Tech doc / state model comments expanded to cover all current behaviour
 
+  v3.0.0 | 2026-04-21 | Delivery service selection added
+    - [NEW]     Standard vs Express delivery section added below delivery address
+    - [NEW]     Delivery services only appear for valid delivery flows
+    - [NEW]     Delivery service state added to checkout logic and payment gating
+    - [UPDATED] Order summary and CTA total now reflect selected delivery service
+    - [UPDATED] Tech doc/current behaviour aligned with delivery service step
+
   v2.8.0 | 2026-04-21 | Sign-in block moved post-resolution
     - [MOVED]   Account/guest block now sits after issue resolution, before contact
     - [CHANGED] Account block starts hidden; revealed only by markResolved()
@@ -164,7 +171,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2.9.1">
+<meta name="version" content="3.0.0">
 <meta name="last-updated" content="2026-04-21">
 <title>Checkout — Jaycar Electronics</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -518,6 +525,34 @@ body {
 .fulfilment-pill { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 4px; margin-bottom: 14px; }
 .pill-collect  { background: rgba(0,159,227,0.1); color: var(--navy); border: 1px solid rgba(0,159,227,0.3); }  /* Cyan tint */
 .pill-delivery { background: rgba(86,191,202,0.1); color: var(--navy); border: 1px solid rgba(86,191,202,0.28); } /* Teal tint */
+
+
+
+/* ══════════════════════════════════════
+   DELIVERY SERVICE SELECTOR (v3.0)
+══════════════════════════════════════ */
+.delivery-service-card { margin-top: 14px; }
+.delivery-service-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.delivery-option {
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.delivery-option:hover { border-color: var(--teal); background: var(--teal-bg); }
+.delivery-option.selected { border-color: var(--cyan); background: rgba(0,159,227,0.06); box-shadow: inset 0 0 0 1px rgba(0,159,227,0.18); }
+.delivery-option input { position:absolute; opacity:0; pointer-events:none; }
+.delivery-option-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+.delivery-option-title { font-size:13px; font-weight:800; color:var(--navy); }
+.delivery-option-price { font-size:13px; font-weight:800; color:var(--navy); }
+.delivery-option-sub { font-size:11.5px; font-weight:600; color:var(--txt-mid); margin-top:4px; line-height:1.45; }
+.delivery-option-meta { display:flex; align-items:center; gap:6px; margin-top:10px; font-size:11px; font-weight:700; color:var(--txt-muted); }
+.delivery-option-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; }
+.delivery-option-pill.default { background: rgba(86,191,202,0.12); border:1px solid rgba(86,191,202,0.25); color:var(--navy); }
+.delivery-option-pill.fast { background: rgba(241,136,5,0.10); border:1px solid rgba(241,136,5,0.25); color:var(--navy); }
 
 /* ══════════════════════════════════════
    ANIMATIONS
@@ -1174,6 +1209,43 @@ body {
               </div>
             </div>
           </div>
+
+          <div id="delivery-service-section" class="card animate-in delivery-service-card hidden">
+            <div class="card-head"><span class="card-head-title">Delivery options</span></div>
+            <div class="card-body">
+              <div class="delivery-service-grid">
+                <label class="delivery-option selected" id="delivery-option-standard">
+                  <input type="radio" name="delivery-service" value="standard" checked onchange="selectDeliveryService('standard')">
+                  <div class="delivery-option-top">
+                    <div>
+                      <div class="delivery-option-title">Standard delivery</div>
+                      <div class="delivery-option-sub">3–7 business days. Best value for most orders.</div>
+                    </div>
+                    <div class="delivery-option-price" id="delivery-option-standard-price">$9.95</div>
+                  </div>
+                  <div class="delivery-option-meta">
+                    <span class="delivery-option-pill default">Default</span>
+                    <span id="delivery-option-standard-estimate">Est. Tue–Thu</span>
+                  </div>
+                </label>
+
+                <label class="delivery-option" id="delivery-option-express">
+                  <input type="radio" name="delivery-service" value="express" onchange="selectDeliveryService('express')">
+                  <div class="delivery-option-top">
+                    <div>
+                      <div class="delivery-option-title">Express delivery</div>
+                      <div class="delivery-option-sub">1–3 business days for faster dispatch and delivery.</div>
+                    </div>
+                    <div class="delivery-option-price" id="delivery-option-express-price">$14.95</div>
+                  </div>
+                  <div class="delivery-option-meta">
+                    <span class="delivery-option-pill fast">Fastest</span>
+                    <span id="delivery-option-express-estimate">Est. Tomorrow–Wed</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1400,7 +1472,7 @@ body {
 
         <div class="summary-divider"></div>
         <div class="summary-line"><span>Subtotal</span><span class="val" id="s-subtotal">$337.80</span></div>
-        <div class="summary-line hidden" id="s-delivery-row"><span>Delivery</span><span class="val" id="s-fulfilment" style="font-weight:700;">$9.95</span></div>
+        <div class="summary-line hidden" id="s-delivery-row"><span id="s-delivery-label">Standard delivery</span><span class="val" id="s-fulfilment" style="font-weight:700;">$9.95</span></div>
         <div class="summary-line total"><span>Grand total</span><span class="val" id="s-total">$337.80</span></div>
         <div class="summary-line gst"><span>Includes GST</span><span class="val">$30.71</span></div>
 
@@ -1502,7 +1574,9 @@ body {
     fulfilmentMode: 'collect',          // 'delivery' | 'collect'
     checkoutMode: null,                 // null | 'guest' | 'signedIn'
     selectedAddressId: null,
-    addressValidationState: 'not_required' // 'valid' | 'invalid' | 'not_required'
+    addressValidationState: 'not_required', // 'valid' | 'invalid' | 'not_required'
+    deliveryService: 'standard'          // 'standard' | 'express'
+
   };
 
   const savedAddresses = [
@@ -1630,6 +1704,7 @@ body {
         checkoutState.addressValidationState = 'not_required';
         qs('address-validation-alert')?.classList.remove('show');
         populateSignedInCollectContact();
+        qs('delivery-service-section')?.classList.add('hidden');
       }
     } else if (isGuest) {
       qs('saved-address-wrap')?.classList.add('hidden');
@@ -1642,6 +1717,35 @@ body {
     qs('delivery-address')?.classList.toggle('hidden', !isDelivery);
     qs('collect-address')?.classList.toggle('hidden', !isCollect);
 
+    updateDeliveryServiceUI();
+    updatePaymentAvailability();
+  }
+
+
+  function getDeliveryFee() {
+    const sub = parseFloat((qs('s-subtotal')?.textContent || '$0').replace(/[^0-9.]/g,'')) || 0;
+    if (checkoutState.fulfilmentMode !== 'delivery') return 0;
+    if (checkoutState.deliveryService === 'standard') {
+      return sub >= 149 ? 0 : 9.95;
+    }
+    return 14.95;
+  }
+
+  function updateDeliveryServiceUI() {
+    const showServices = checkoutState.fulfilmentMode === 'delivery' &&
+      (checkoutState.checkoutMode === 'guest' || checkoutState.addressValidationState === 'valid');
+    qs('delivery-service-section')?.classList.toggle('hidden', !showServices);
+    if (qs('delivery-option-standard')) qs('delivery-option-standard').classList.toggle('selected', checkoutState.deliveryService === 'standard');
+    if (qs('delivery-option-express')) qs('delivery-option-express').classList.toggle('selected', checkoutState.deliveryService === 'express');
+    const std = parseFloat((qs('s-subtotal')?.textContent || '$0').replace(/[^0-9.]/g,'')) || 0;
+    const stdFee = std >= 149 ? 0 : 9.95;
+    if (qs('delivery-option-standard-price')) qs('delivery-option-standard-price').textContent = stdFee === 0 ? 'FREE' : '$' + stdFee.toFixed(2);
+  }
+
+  function selectDeliveryService(service) {
+    checkoutState.deliveryService = service;
+    updateDeliveryServiceUI();
+    updateSummaryForMode();
     updatePaymentAvailability();
   }
 
@@ -1656,8 +1760,8 @@ body {
     const pathChosen = !!checkoutState.checkoutMode;
     const validState =
       checkoutState.fulfilmentMode === 'collect' ||
-      checkoutState.checkoutMode === 'guest' ||
-      checkoutState.addressValidationState === 'valid';
+      (checkoutState.checkoutMode === 'guest' && !!checkoutState.deliveryService) ||
+      (checkoutState.checkoutMode === 'signedIn' && checkoutState.addressValidationState === 'valid' && !!checkoutState.deliveryService);
 
     paymentPending?.classList.toggle('hidden', pathChosen && validState);
     paymentActive?.classList.toggle('hidden', !(pathChosen && validState));
@@ -1789,6 +1893,7 @@ body {
   }
 
   function updateSummaryForMode() {
+    const sub = parseFloat((qs('s-subtotal').textContent || '$0').replace(/[^0-9.]/g,''));
     if (checkoutState.fulfilmentMode === 'collect') {
       qs('fulfilment-pill').className = 'fulfilment-pill pill-collect';
       qs('fulfilment-pill').style.display = '';
@@ -1800,22 +1905,30 @@ body {
     } else {
       qs('fulfilment-pill').style.display = 'none';
       qs('s-delivery-row').classList.remove('hidden');
-      const sub = parseFloat((qs('s-subtotal').textContent || '$0').replace(/[^0-9.]/g,''));
-      qs('s-fulfilment').textContent = '$9.95';
-      qs('s-fulfilment').style.color = 'var(--txt-mid)';
-      qs('s-fulfilment').style.fontWeight = '600';
-      qs('s-total').textContent = '$' + (sub + 9.95).toFixed(2);
-      if (qs('cta-total')) qs('cta-total').textContent = '$' + (sub + 9.95).toFixed(2);
-      const gap = Math.max(0, 149 - sub);
-      qs('free-delivery-bar').style.display = '';
-      qs('free-del-amount').textContent = '$' + gap.toFixed(2);
-      const pct = Math.min(100, (sub / 149 * 100)).toFixed(1);
-      qs('free-del-bar').style.width = pct + '%';
+      const fee = getDeliveryFee();
+      const label = checkoutState.deliveryService === 'express' ? 'Express delivery' : 'Standard delivery';
+      if (qs('s-delivery-label')) qs('s-delivery-label').textContent = label;
+      qs('s-fulfilment').textContent = fee === 0 ? 'FREE' : '$' + fee.toFixed(2);
+      qs('s-fulfilment').style.color = fee === 0 ? 'var(--cyan)' : 'var(--txt-mid)';
+      qs('s-fulfilment').style.fontWeight = '700';
+      qs('s-total').textContent = '$' + (sub + fee).toFixed(2);
+      if (qs('cta-total')) qs('cta-total').textContent = '$' + (sub + fee).toFixed(2);
+      if (checkoutState.deliveryService === 'standard') {
+        const gap = Math.max(0, 149 - sub);
+        qs('free-delivery-bar').style.display = '';
+        qs('free-del-amount').textContent = '$' + gap.toFixed(2);
+        const pct = Math.min(100, (sub / 149 * 100)).toFixed(1);
+        qs('free-del-bar').style.width = pct + '%';
+      } else {
+        qs('free-delivery-bar').style.display = 'none';
+      }
     }
+    updateDeliveryServiceUI();
   }
 
   function resolveCollect() {
     checkoutState.fulfilmentMode = 'collect';
+    checkoutState.deliveryService = 'standard';
     qs('card-collect').className = 'method-card selected';
     qs('card-delivery').className = 'method-card';
     if (qs('speaker-flag')) qs('speaker-flag').style.display = 'none';
@@ -1826,6 +1939,7 @@ body {
 
   function resolveRemove() {
     checkoutState.fulfilmentMode = 'delivery';
+    checkoutState.deliveryService = 'standard';
     qs('item-speaker').style.display = 'none';
     qs('item-count').textContent = '5 items';
     qs('s-subtotal').textContent = '$292.85';
@@ -1846,6 +1960,7 @@ body {
 
   function selectCollect() {
     checkoutState.fulfilmentMode = 'collect';
+    checkoutState.deliveryService = 'standard';
     qs('card-collect').className = 'method-card selected';
     qs('card-delivery').className = 'method-card';
     if (!checkoutState.resolved) return resolveCollect();
@@ -1855,6 +1970,7 @@ body {
 
   function selectDelivery() {
     checkoutState.fulfilmentMode = 'delivery';
+    checkoutState.deliveryService = checkoutState.deliveryService || 'standard';
     if (!checkoutState.resolved) {
       qs('card-delivery').className = 'method-card blocked';
       qs('card-collect').className = 'method-card recommended';
