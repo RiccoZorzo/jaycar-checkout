@@ -29,22 +29,10 @@
     - Full PDP two-row nav + footer transplanted
     - Figtree font, all radii 4px, Jaycar SVG logo
 
-  v2.9.0 | 2026-04-21 | Signed-in checkout mode + saved address selector
-    - [NEW]     Account mode state machine: guest vs signed-in vs pending
-    - [NEW]     Saved address radio-card selector for signed-in delivery
-    - [NEW]     Inline delivery revalidation when saved address changes
-    - [NEW]     Click & Collect signed-in mode hides address book and shows prefilled collection contact
-    - [NEW]     Pending lock state after resolution until guest/sign-in path is chosen
-    - [UPDATED] Contact section works for both guest and signed-in customers
-    - [UPDATED] Payment availability now respects basket resolution + account mode + address validity
-    - [UPDATED] Tech doc / state model comments expanded to cover all current behaviour
-
-  v3.0.0 | 2026-04-21 | Delivery service selection added
-    - [NEW]     Standard vs Express delivery section added below delivery address
-    - [NEW]     Delivery services only appear for valid delivery flows
-    - [NEW]     Delivery service state added to checkout logic and payment gating
-    - [UPDATED] Order summary and CTA total now reflect selected delivery service
-    - [UPDATED] Tech doc/current behaviour aligned with delivery service step
+  v2.8.1 | 2026-04-21 | Signed-in contact banner made fulfilment-aware
+    - [FIXED]   Signed-in contact banner now changes copy based on Click & Collect vs Delivery
+    - [FIXED]   Removed delivery wording from signed-in message when fulfilment is Click & Collect
+    - [NEW]     Inline signed-in banner with guest fallback link inside contact section
 
   v2.8.0 | 2026-04-21 | Sign-in block moved post-resolution
     - [MOVED]   Account/guest block now sits after issue resolution, before contact
@@ -89,81 +77,30 @@
     - [CHANGED] Page background: Warm Grey #DCD7D4 → white #ffffff
 
   v2.3.0 | 2026-04-21 | Colour audit + header/nav simplification
-    - [CHANGED] All colours corrected to Jaycar Brand Guidelines 2018
-    - [REMOVED] Nav bottom row, burger menu, search bar
-    - [UPDATED] body padding-top: 68px (single-row nav)
+    - [CHANGED] All colours corrected to Jaycar Brand Guidelines 2018:
+        Navy    #0C254C  (primary — unchanged, was already correct)
+        Orange  #F18805  (primary — corrected from #F68b22 campaign colour)
+        Teal    #56BFCA  (secondary — corrected from #56BFC9)
+        Magenta #E5007D  (secondary — replaces non-brand greens/reds)
+        Sale Red #CF0B2A (secondary — replaces #c0392b non-brand red)
+        Gold    #F6C100  (secondary — replaces amber/yellow tints)
+        Cyan    #009FE3  (primary — replaces teal-bg tints)
+        Warm Grey #DCD7D4 (secondary — page background)
+    - [REMOVED] Nav bottom row (burger menu, Shop Products, nav links)
+    - [REMOVED] Search bar from header
+    - [KEPT]    Logo + version tooltip, Account/Lists/Cart icons,
+                Deliver To / Your Store store selectors
+    - [REVERTED] Progress bar back to v2.1 style (sticky under fixed header)
+    - [UPDATED]  body padding-top: 68px (single-row nav)
+    - Tech doc updated
 
-  IMPLEMENTATION NOTES / TECH DOC
+  DESIGN NOTES — v2.0.0
   ---------------------------------------------------------------
-  PURPOSE
-  - Validate fulfilment before asking the customer to invest effort in checkout.
-  - Keep guest checkout easy while still supporting loyalty sign-in and saved details.
-
-  CORE FLOW
-  1. Basket issue surfaces first.
-  2. Customer resolves basket issue via Click & Collect, remove item, or postcode edit.
-  3. Resolution reveals account choice.
-  4. Customer chooses guest or signs in.
-  5. Contact + fulfilment details render based on fulfilment mode and account mode.
-  6. Payment only becomes active when the current checkout state is valid.
-
-  STATE MODEL
-  - resolved: basket issue has been handled
-  - fulfilmentMode: 'delivery' | 'collect'
-  - checkoutMode: null | 'guest' | 'signedIn'
-  - selectedAddressId: saved address currently selected in signed-in delivery mode
-  - addressValidationState: 'valid' | 'invalid' | 'not_required'
-
-  SUPPORTED STATES
-  A. Basket unresolved
-     - basket alert visible
-     - issue card visible
-     - account block hidden
-     - contact + payment locked
-
-  B. Basket resolved, checkout mode not chosen
-     - resolved banner visible
-     - account block visible
-     - contact + payment stay in pending lock state
-
-  C. Guest + delivery
-     - blank contact form
-     - delivery address form active
-     - no saved address selector
-     - payment active
-
-  D. Guest + click & collect
-     - blank contact form
-     - collection contact + store visible
-     - no saved address selector
-     - payment active
-
-  E. Signed in + delivery + valid address
-     - contact details prefilled
-     - saved address selector visible
-     - selected address flows into delivery form
-     - payment active
-
-  F. Signed in + delivery + invalid address
-     - saved address selector visible
-     - inline alert appears
-     - payment locked
-     - actions available: switch to click & collect, choose another address, remove affected item
-
-  G. Signed in + click & collect
-     - prefilled contact details visible
-     - collection contact + store visible
-     - address selector hidden
-     - payment active
-
-  ADDRESS BOOK RULES
-  - Saved address selector appears only for signed-in delivery mode.
-  - Click & Collect hides address book because delivery address is not required.
-  - Changing saved address revalidates the current basket.
-
-  COPY RULE
-  - Never expose internal logistics logic such as nearest full-basket fulfilling store within 40 km.
-  - Show customer-facing outcomes only.
+  1. Basket Status Block: issues surface before any form entry
+  2. Delivery method moved to step 1 (was step 3)
+  3. Item Issue Resolution card: plain-language outcome only
+  4. Progressive disclosure gate: contact + payment locked until resolved
+  5. Multi-step pagination removed: single-page inline transitions
 =============================================================
 -->
 <!DOCTYPE html>
@@ -171,7 +108,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="3.0.0">
+<meta name="version" content="2.8.1">
 <meta name="last-updated" content="2026-04-21">
 <title>Checkout — Jaycar Electronics</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -527,32 +464,22 @@ body {
 .pill-delivery { background: rgba(86,191,202,0.1); color: var(--navy); border: 1px solid rgba(86,191,202,0.28); } /* Teal tint */
 
 
-
-/* ══════════════════════════════════════
-   DELIVERY SERVICE SELECTOR (v3.0)
-══════════════════════════════════════ */
-.delivery-service-card { margin-top: 14px; }
-.delivery-service-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.delivery-option {
-  border: 1.5px solid var(--border);
-  border-radius: var(--radius);
-  padding: 14px;
-  background: var(--surface);
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
-  position: relative;
+/* Signed-in contact banner */
+.signedin-banner {
+  display:none;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding:14px 16px;
+  margin-bottom:12px;
+  background:rgba(12,37,76,0.04);
+  border:1px solid rgba(12,37,76,0.12);
+  border-radius:4px;
 }
-.delivery-option:hover { border-color: var(--teal); background: var(--teal-bg); }
-.delivery-option.selected { border-color: var(--cyan); background: rgba(0,159,227,0.06); box-shadow: inset 0 0 0 1px rgba(0,159,227,0.18); }
-.delivery-option input { position:absolute; opacity:0; pointer-events:none; }
-.delivery-option-top { display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
-.delivery-option-title { font-size:13px; font-weight:800; color:var(--navy); }
-.delivery-option-price { font-size:13px; font-weight:800; color:var(--navy); }
-.delivery-option-sub { font-size:11.5px; font-weight:600; color:var(--txt-mid); margin-top:4px; line-height:1.45; }
-.delivery-option-meta { display:flex; align-items:center; gap:6px; margin-top:10px; font-size:11px; font-weight:700; color:var(--txt-muted); }
-.delivery-option-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 8px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:0.05em; text-transform:uppercase; }
-.delivery-option-pill.default { background: rgba(86,191,202,0.12); border:1px solid rgba(86,191,202,0.25); color:var(--navy); }
-.delivery-option-pill.fast { background: rgba(241,136,5,0.10); border:1px solid rgba(241,136,5,0.25); color:var(--navy); }
+.signedin-banner.show { display:flex; }
+.signedin-banner-title { font-size:13px; font-weight:800; color:var(--navy); }
+.signedin-banner-sub { font-size:12px; font-weight:500; color:var(--txt-mid); margin-top:2px; max-width:560px; }
+.signedin-banner-link { font-size:12px; font-weight:700; color:var(--cyan); white-space:nowrap; cursor:pointer; text-decoration:underline; text-underline-offset:2px; background:none; border:none; font-family:var(--font); padding:0; }
 
 /* ══════════════════════════════════════
    ANIMATIONS
@@ -722,114 +649,6 @@ body {
   color: #a07800;
 }
 .loyalty-nudge a { color: var(--cyan); text-decoration: underline; cursor: pointer; margin-left: auto; font-size: 11px; font-weight: 700; white-space: nowrap; }
-
-/* ══════════════════════════════════════
-   ACCOUNT MODE / ADDRESS BOOK (v2.9)
-══════════════════════════════════════ */
-.pending-section {
-  border: 1px dashed var(--border-mid);
-  border-radius: var(--radius-lg);
-  padding: 18px 20px;
-  margin-bottom: 16px;
-  background: rgba(12,37,76,0.03);
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.pending-section .pending-title { font-size: 12px; font-weight: 700; color: var(--navy); }
-.pending-section .pending-sub { font-size: 11px; color: var(--txt-muted); margin-top: 2px; }
-
-.account-status-banner {
-  display: none;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  background: rgba(12,37,76,0.04);
-  border: 1px solid rgba(12,37,76,0.14);
-  border-radius: 4px;
-}
-.account-status-banner.show { display: flex; }
-
-.saved-address-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  margin-top: 14px;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm);
-}
-.address-list {
-  display: grid;
-  gap: 10px;
-}
-.address-option {
-  border: 1.5px solid var(--border);
-  border-radius: 4px;
-  padding: 14px;
-  display: grid;
-  grid-template-columns: 18px 1fr auto;
-  gap: 12px;
-  align-items: start;
-  cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
-}
-.address-option:hover { border-color: var(--teal); background: var(--teal-bg); }
-.address-option.selected { border-color: var(--cyan); background: rgba(0,159,227,0.06); }
-.address-option input { margin-top: 2px; }
-.address-option-title { font-size: 12px; font-weight: 800; color: var(--navy); text-transform: uppercase; letter-spacing: 0.05em; }
-.address-option-lines { font-size: 12px; color: var(--txt-mid); line-height: 1.5; margin-top: 2px; }
-.address-option-tag {
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 4px 8px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
-.tag-valid { background: rgba(0,159,227,0.09); color: var(--cyan); border: 1px solid rgba(0,159,227,0.22); }
-.tag-invalid { background: var(--orange-bg); color: var(--orange); border: 1px solid var(--orange-bdr); }
-
-.inline-validation-alert {
-  display: none;
-  margin-top: 14px;
-  padding: 14px 16px;
-  background: var(--orange-bg);
-  border: 1px solid var(--orange-bdr);
-  border-left: 4px solid var(--orange);
-  border-radius: 4px;
-}
-.inline-validation-alert.show { display: block; }
-.inline-validation-alert-title { font-size: 12px; font-weight: 800; color: var(--navy); margin-bottom: 4px; }
-.inline-validation-alert-sub { font-size: 12px; color: var(--txt-mid); margin-bottom: 10px; }
-.inline-validation-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-
-.prefill-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 10px;
-  background: rgba(0,159,227,0.08);
-  border: 1px solid rgba(0,159,227,0.22);
-  border-radius: 4px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--navy);
-}
-
-.muted-link-btn {
-  background: none;
-  border: none;
-  color: var(--cyan);
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  text-decoration: underline;
-  font-family: var(--font);
-  padding: 0;
-}
-
 </style>
 </head>
 <body>
@@ -853,7 +672,7 @@ body {
         <span style="color:#8692A6;">v2.0</span><span>Fulfilment-first redesign</span>
         <span style="color:#8692A6;">v2.1</span><span>Design notes to version control</span>
         <span style="color:#8692A6;">v2.2</span><span>PDP nav/footer, Figtree, 4px radii</span>
-        <span style="color:#8692A6;font-weight:700;">v2.9</span><span style="font-weight:700;">Signed-in checkout + saved address logic ← current</span>
+        <span style="color:#8692A6;font-weight:700;">v2.7</span><span style="font-weight:700;">Account / loyalty sign-in block ← current</span>
         <span style="color:#8692A6;">v2.6</span><span>Error state, summary UX, more cart items</span>
         <span style="color:#8692A6;">v2.5</span><span>Icons, product images, delivery toggle</span>
         <span style="color:#8692A6;">v2.4</span><span>Header trimmed, background white</span>
@@ -1084,166 +903,83 @@ body {
         </div>
       </div>
 
-      
-<div class="hidden" id="contact-form">
-        <div class="pending-section" id="contact-pending">
-          <div class="lock-icon-wrap">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#0C254C" stroke-width="1.4"/><path d="M8 4.5v4" stroke="#0C254C" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.8" fill="#0C254C"/></svg>
-          </div>
+      <div class="hidden" id="contact-form">
+        <div class="section-num" style="margin-bottom:12px;"><div class="num">4</div><div class="lbl">Your contact details</div></div>
+        <div class="signedin-banner" id="signedin-contact-banner">
           <div>
-            <div class="pending-title">Choose sign in or guest checkout to continue</div>
-            <div class="pending-sub">After your basket is valid, pick your checkout path. Guest keeps the form blank. Sign in prefills saved details and can show your address book.</div>
+            <div class="signedin-banner-title" id="signedin-contact-title">Signed in checkout</div>
+            <div class="signedin-banner-sub" id="signedin-contact-sub">We've filled your contact details from your account.</div>
+          </div>
+          <button class="signedin-banner-link" onclick="switchToGuestFromBanner()">Use guest checkout instead</button>
+        </div>
+        <div class="card animate-in">
+          <div class="card-head"><span class="card-head-title">Contact</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label" for="email" style="display:flex;align-items:center;justify-content:space-between;">
+                Email address
+                <span style="font-size:10.5px;font-weight:600;color:var(--txt-muted);text-transform:none;letter-spacing:0;">
+                  Already have an account? <a style="color:var(--cyan);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="scrollToSignIn()">Sign in</a>
+                </span>
+              </label>
+              <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" onblur="checkEmailRecognition(this.value)">
+              <div class="email-recognition" id="email-recognition">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#009FE3" stroke-width="1.4" stroke-linecap="round"/></svg>
+                <span>Looks like you have an account — <a onclick="scrollToSignIn()">sign in to collect your points and use saved details</a></span>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="fname">First name</label>
+                <input class="form-input" type="text" id="fname" placeholder="First" autocomplete="given-name">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lname">Last name</label>
+                <input class="form-input" type="text" id="lname" placeholder="Last" autocomplete="family-name">
+              </div>
+            </div>
+            <div class="form-group" style="margin-bottom:0">
+              <label class="form-label" for="mobile">Mobile number</label>
+              <input class="form-input" type="tel" id="mobile" placeholder="04xx xxx xxx" autocomplete="tel" inputmode="tel">
+            </div>
           </div>
         </div>
 
-        <div class="hidden" id="contact-active">
-          <div class="section-num" style="margin-bottom:12px;"><div class="num">4</div><div class="lbl">Your contact details</div></div>
-
-          <div class="account-status-banner" id="account-status-banner">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#0C254C" stroke-width="1.4" stroke-linecap="round"/></svg>
-            <div style="flex:1;">
-              <div style="font-size:12px;font-weight:800;color:var(--navy);">Signed in checkout</div>
-              <div style="font-size:11px;color:var(--txt-muted);">Saved contact details are loaded below. Choose a saved address for delivery or continue with your selected collection store.</div>
-            </div>
-            <button class="muted-link-btn" onclick="switchToGuest()">Use guest checkout instead</button>
-          </div>
-
-          <div id="saved-address-wrap" class="saved-address-card hidden">
-            <div class="card-head"><span class="card-head-title">Saved addresses</span></div>
-            <div class="card-body">
-              <div class="prefill-note" style="margin-bottom:12px;">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#009FE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Signed in — choose a saved address for delivery
+        <div id="collect-address" class="card animate-in" style="margin-top:14px;">
+          <div class="card-head"><span class="card-head-title">Collection store</span></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,159,227,0.08);border:1px solid rgba(0,159,227,0.25);border-radius:4px;">
+              <div>
+                <div style="font-size:13px;font-weight:800;color:var(--navy);">Jaycar Wetherill Park</div>
+                <div style="font-size:12px;font-weight:600;color:var(--txt-mid);margin-top:2px;">1/7 Foundry Rd, Wetherill Park NSW 2164</div>
+                <div style="font-size:11px;color:var(--txt-muted);margin-top:2px;">Ready within 2 hours · Mon–Fri 8am–5:30pm</div>
               </div>
-              <div class="address-list" id="address-list"></div>
-              <div style="margin-top:12px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
-                <button class="btn btn-sm btn-ghost" onclick="addNewAddress()">+ Add new address</button>
-                <button class="muted-link-btn" onclick="editSelectedAddress()">Edit selected address</button>
-              </div>
-              <div class="inline-validation-alert" id="address-validation-alert">
-                <div class="inline-validation-alert-title">This address can’t receive 1 clearance item in your basket</div>
-                <div class="inline-validation-alert-sub">Choose another saved address, switch to Click &amp; Collect, or remove the affected item.</div>
-                <div class="inline-validation-actions">
-                  <button class="btn btn-sm btn-cyan" onclick="resolveCollect()">Switch to Click &amp; Collect</button>
-                  <button class="btn btn-sm btn-ghost" onclick="focusAddressList()">Choose another address</button>
-                  <button class="btn btn-sm btn-danger" onclick="resolveRemove()">Remove affected item</button>
-                </div>
-              </div>
+              <button class="btn btn-sm btn-ghost">Change</button>
             </div>
           </div>
+        </div>
 
-          <div class="card animate-in">
-            <div class="card-head">
-              <span class="card-head-title">Contact</span>
-              <span id="prefill-badge" class="prefill-note hidden">
-                <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="#009FE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                Loaded from account
-              </span>
+        <div id="delivery-address" class="card animate-in hidden" style="margin-top:14px;">
+          <div class="card-head"><span class="card-head-title">Delivery address</span></div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label" for="address">Street address</label>
+              <input class="form-input" type="text" id="address" placeholder="Start typing your address…" autocomplete="street-address">
             </div>
-            <div class="card-body">
-              <div class="form-group">
-                <label class="form-label" for="email" style="display:flex;align-items:center;justify-content:space-between;">
-                  Email address
-                  <span style="font-size:10.5px;font-weight:600;color:var(--txt-muted);text-transform:none;letter-spacing:0;">
-                    Already have an account? <a style="color:var(--cyan);font-weight:700;cursor:pointer;text-decoration:underline;" onclick="scrollToSignIn()">Sign in</a>
-                  </span>
-                </label>
-                <input class="form-input" type="email" id="email" placeholder="you@example.com" autocomplete="email" onblur="checkEmailRecognition(this.value)">
-                <div class="email-recognition" id="email-recognition">
-                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#009FE3" stroke-width="1.4" stroke-linecap="round"/></svg>
-                  <span>Looks like you have an account — <a onclick="scrollToSignIn()">sign in to collect your points and use saved details</a></span>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label" for="fname">First name</label>
-                  <input class="form-input" type="text" id="fname" placeholder="First" autocomplete="given-name">
-                </div>
-                <div class="form-group">
-                  <label class="form-label" for="lname">Last name</label>
-                  <input class="form-input" type="text" id="lname" placeholder="Last" autocomplete="family-name">
-                </div>
-              </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label" for="suburb">Suburb</label><input class="form-input" type="text" id="suburb" placeholder="Suburb"></div>
+              <div class="form-group"><label class="form-label" for="postcode">Postcode</label><input class="form-input" type="text" id="postcode" placeholder="2000" maxlength="4" inputmode="numeric"></div>
+            </div>
+            <div class="form-row" style="margin-bottom:0">
               <div class="form-group" style="margin-bottom:0">
-                <label class="form-label" for="mobile">Mobile number</label>
-                <input class="form-input" type="tel" id="mobile" placeholder="04xx xxx xxx" autocomplete="tel" inputmode="tel">
+                <label class="form-label" for="state">State</label>
+                <select class="form-select" id="state">
+                  <option value="">Select state</option>
+                  <option>NSW</option><option>VIC</option><option>QLD</option>
+                  <option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+                </select>
               </div>
-            </div>
-          </div>
-
-          <div id="collect-address" class="card animate-in" style="margin-top:14px;">
-            <div class="card-head"><span class="card-head-title">Collection store</span></div>
-            <div class="card-body">
-              <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:rgba(0,159,227,0.08);border:1px solid rgba(0,159,227,0.25);border-radius:4px;">
-                <div>
-                  <div style="font-size:13px;font-weight:800;color:var(--navy);">Jaycar Wetherill Park</div>
-                  <div style="font-size:12px;font-weight:600;color:var(--txt-mid);margin-top:2px;">1/7 Foundry Rd, Wetherill Park NSW 2164</div>
-                  <div style="font-size:11px;color:var(--txt-muted);margin-top:2px;">Ready within 2 hours · Mon–Fri 8am–5:30pm</div>
-                </div>
-                <button class="btn btn-sm btn-ghost">Change</button>
-              </div>
-            </div>
-          </div>
-
-          <div id="delivery-address" class="card animate-in hidden" style="margin-top:14px;">
-            <div class="card-head"><span class="card-head-title">Delivery address</span></div>
-            <div class="card-body">
-              <div class="form-group">
-                <label class="form-label" for="address">Street address</label>
-                <input class="form-input" type="text" id="address" placeholder="Start typing your address…" autocomplete="street-address">
-              </div>
-              <div class="form-row">
-                <div class="form-group"><label class="form-label" for="suburb">Suburb</label><input class="form-input" type="text" id="suburb" placeholder="Suburb"></div>
-                <div class="form-group"><label class="form-label" for="postcode">Postcode</label><input class="form-input" type="text" id="postcode" placeholder="2000" maxlength="4" inputmode="numeric"></div>
-              </div>
-              <div class="form-row" style="margin-bottom:0">
-                <div class="form-group" style="margin-bottom:0">
-                  <label class="form-label" for="state">State</label>
-                  <select class="form-select" id="state">
-                    <option value="">Select state</option>
-                    <option>NSW</option><option>VIC</option><option>QLD</option>
-                    <option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
-                  </select>
-                </div>
-                <div class="form-group" style="margin-bottom:0"></div>
-              </div>
-            </div>
-          </div>
-
-          <div id="delivery-service-section" class="card animate-in delivery-service-card hidden">
-            <div class="card-head"><span class="card-head-title">Delivery options</span></div>
-            <div class="card-body">
-              <div class="delivery-service-grid">
-                <label class="delivery-option selected" id="delivery-option-standard">
-                  <input type="radio" name="delivery-service" value="standard" checked onchange="selectDeliveryService('standard')">
-                  <div class="delivery-option-top">
-                    <div>
-                      <div class="delivery-option-title">Standard delivery</div>
-                      <div class="delivery-option-sub">3–7 business days. Best value for most orders.</div>
-                    </div>
-                    <div class="delivery-option-price" id="delivery-option-standard-price">$9.95</div>
-                  </div>
-                  <div class="delivery-option-meta">
-                    <span class="delivery-option-pill default">Default</span>
-                    <span id="delivery-option-standard-estimate">Est. Tue–Thu</span>
-                  </div>
-                </label>
-
-                <label class="delivery-option" id="delivery-option-express">
-                  <input type="radio" name="delivery-service" value="express" onchange="selectDeliveryService('express')">
-                  <div class="delivery-option-top">
-                    <div>
-                      <div class="delivery-option-title">Express delivery</div>
-                      <div class="delivery-option-sub">1–3 business days for faster dispatch and delivery.</div>
-                    </div>
-                    <div class="delivery-option-price" id="delivery-option-express-price">$14.95</div>
-                  </div>
-                  <div class="delivery-option-meta">
-                    <span class="delivery-option-pill fast">Fastest</span>
-                    <span id="delivery-option-express-estimate">Est. Tomorrow–Wed</span>
-                  </div>
-                </label>
-              </div>
+              <div class="form-group" style="margin-bottom:0"></div>
             </div>
           </div>
         </div>
@@ -1263,17 +999,6 @@ body {
       </div>
 
       <div class="hidden" id="payment-form">
-        <div class="pending-section" id="payment-pending">
-          <div class="lock-icon-wrap">
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#0C254C" stroke-width="1.4"/><path d="M8 4.5v4" stroke="#0C254C" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.5" r="0.8" fill="#0C254C"/></svg>
-          </div>
-          <div>
-            <div class="pending-title">Choose guest or sign in to unlock payment</div>
-            <div class="pending-sub">Payment becomes available after the checkout path is chosen and the current fulfilment state is valid.</div>
-          </div>
-        </div>
-
-        <div class="hidden" id="payment-active">
         <div class="section-num" style="margin-bottom:12px;"><div class="num">5</div><div class="lbl">Payment</div></div>
         <div class="card animate-in">
           <div class="card-head"><span class="card-head-title">Choose payment method</span></div>
@@ -1329,7 +1054,6 @@ body {
             <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#56BFCA" stroke-width="1.3"/><path d="M8 4.5v4l2.5 1.5" stroke="#56BFCA" stroke-width="1.3" stroke-linecap="round"/></svg>
             1800 022 888
           </span>
-        </div>
         </div>
       </div>
     </div>
@@ -1472,7 +1196,7 @@ body {
 
         <div class="summary-divider"></div>
         <div class="summary-line"><span>Subtotal</span><span class="val" id="s-subtotal">$337.80</span></div>
-        <div class="summary-line hidden" id="s-delivery-row"><span id="s-delivery-label">Standard delivery</span><span class="val" id="s-fulfilment" style="font-weight:700;">$9.95</span></div>
+        <div class="summary-line hidden" id="s-delivery-row"><span>Delivery</span><span class="val" id="s-fulfilment" style="font-weight:700;">$9.95</span></div>
         <div class="summary-line total"><span>Grand total</span><span class="val" id="s-total">$337.80</span></div>
         <div class="summary-line gst"><span>Includes GST</span><span class="val">$30.71</span></div>
 
@@ -1566,388 +1290,88 @@ body {
   </div>
 </footer>
 
-
 <script>
-  // ── CHECKOUT STATE MODEL (v2.9) ───────────────────────────────────────────
-  const checkoutState = {
-    resolved: false,
-    fulfilmentMode: 'collect',          // 'delivery' | 'collect'
-    checkoutMode: null,                 // null | 'guest' | 'signedIn'
-    selectedAddressId: null,
-    addressValidationState: 'not_required', // 'valid' | 'invalid' | 'not_required'
-    deliveryService: 'standard'          // 'standard' | 'express'
-
-  };
-
-  const savedAddresses = [
-    {
-      id: "home",
-      label: "Home",
-      name: "Ricco Zorzo",
-      line1: "45 Pearl Street",
-      suburb: "Newtown",
-      state: "NSW",
-      postcode: "2042",
-      phone: "0434491006",
-      email: "rezorzo@gmail.com",
-      validForCurrentBasket: false
-    },
-    {
-      id: "work",
-      label: "Work",
-      name: "Ricco Zorzo",
-      line1: "12 Foundry Road",
-      suburb: "Wetherill Park",
-      state: "NSW",
-      postcode: "2164",
-      phone: "0434491006",
-      email: "rezorzo@gmail.com",
-      validForCurrentBasket: true
-    },
-    {
-      id: "parents",
-      label: "Parents",
-      name: "Ricco Zorzo",
-      line1: "88 Sample Avenue",
-      suburb: "Blacktown",
-      state: "NSW",
-      postcode: "2148",
-      phone: "0400000000",
-      email: "rezorzo@gmail.com",
-      validForCurrentBasket: true
-    }
-  ];
-
-  function qs(id) { return document.getElementById(id); }
-
-  function renderSavedAddresses() {
-    const list = qs('address-list');
-    if (!list) return;
-    list.innerHTML = savedAddresses.map(addr => `
-      <label class="address-option ${checkoutState.selectedAddressId === addr.id ? 'selected' : ''}" data-address-id="${addr.id}">
-        <input type="radio" name="saved-address" ${checkoutState.selectedAddressId === addr.id ? 'checked' : ''} onchange="selectSavedAddress('${addr.id}')">
-        <div>
-          <div class="address-option-title">${addr.label}</div>
-          <div class="address-option-lines">
-            ${addr.name}<br>
-            ${addr.line1}, ${addr.suburb} ${addr.state} ${addr.postcode}<br>
-            ${addr.phone}
-          </div>
-        </div>
-        <div class="address-option-tag ${addr.validForCurrentBasket ? 'tag-valid' : 'tag-invalid'}">
-          ${addr.validForCurrentBasket ? 'Delivery OK' : 'Needs fix'}
-        </div>
-      </label>
-    `).join('');
-  }
-
-  function populateContactFromAddress(addr) {
-    if (!addr) return;
-    if (qs('email')) qs('email').value = addr.email || '';
-    if (qs('fname')) qs('fname').value = addr.name.split(' ')[0] || '';
-    if (qs('lname')) qs('lname').value = addr.name.split(' ').slice(1).join(' ') || '';
-    if (qs('mobile')) qs('mobile').value = addr.phone || '';
-    if (qs('address')) qs('address').value = addr.line1 || '';
-    if (qs('suburb')) qs('suburb').value = addr.suburb || '';
-    if (qs('postcode')) qs('postcode').value = addr.postcode || '';
-    if (qs('state')) qs('state').value = addr.state || '';
-  }
-
-  function clearGuestContactForm() {
-    ['email','fname','lname','mobile','address','suburb','postcode'].forEach(id => {
-      if (qs(id)) qs(id).value = '';
-    });
-    if (qs('state')) qs('state').value = '';
-  }
-
-  function selectSavedAddress(addressId) {
-    checkoutState.selectedAddressId = addressId;
-    renderSavedAddresses();
-    const selected = savedAddresses.find(a => a.id === addressId);
-    populateContactFromAddress(selected);
-    revalidateAddressForBasket();
-  }
-
-  function revalidateAddressForBasket() {
-    if (checkoutState.checkoutMode !== 'signedIn' || checkoutState.fulfilmentMode !== 'delivery') {
-      checkoutState.addressValidationState = 'not_required';
-      qs('address-validation-alert')?.classList.remove('show');
-      return true;
-    }
-    const selected = savedAddresses.find(a => a.id === checkoutState.selectedAddressId);
-    const isValid = !!selected?.validForCurrentBasket;
-    checkoutState.addressValidationState = isValid ? 'valid' : 'invalid';
-    qs('address-validation-alert')?.classList.toggle('show', !isValid);
-    updatePaymentAvailability();
-    return isValid;
-  }
-
-  function updateContactView() {
-    const isSignedIn = checkoutState.checkoutMode === 'signedIn';
-    const isGuest = checkoutState.checkoutMode === 'guest';
-    const isCollect = checkoutState.fulfilmentMode === 'collect';
-    const isDelivery = checkoutState.fulfilmentMode === 'delivery';
-
-    qs('contact-pending')?.classList.toggle('hidden', !!checkoutState.checkoutMode);
-    qs('contact-active')?.classList.toggle('hidden', !checkoutState.checkoutMode);
-    qs('account-status-banner')?.classList.toggle('show', isSignedIn);
-    qs('prefill-badge')?.classList.toggle('hidden', !isSignedIn);
-
-    if (isSignedIn) {
-      if (!checkoutState.selectedAddressId) checkoutState.selectedAddressId = 'home';
-      renderSavedAddresses();
-      if (isDelivery) {
-        qs('saved-address-wrap')?.classList.remove('hidden');
-        selectSavedAddress(checkoutState.selectedAddressId);
-      } else {
-        qs('saved-address-wrap')?.classList.add('hidden');
-        checkoutState.addressValidationState = 'not_required';
-        qs('address-validation-alert')?.classList.remove('show');
-        populateSignedInCollectContact();
-        qs('delivery-service-section')?.classList.add('hidden');
-      }
-    } else if (isGuest) {
-      qs('saved-address-wrap')?.classList.add('hidden');
-      qs('account-status-banner')?.classList.remove('show');
-      qs('prefill-badge')?.classList.add('hidden');
-      checkoutState.addressValidationState = isCollect ? 'not_required' : 'valid';
-      clearGuestContactForm();
-    }
-
-    qs('delivery-address')?.classList.toggle('hidden', !isDelivery);
-    qs('collect-address')?.classList.toggle('hidden', !isCollect);
-
-    updateDeliveryServiceUI();
-    updatePaymentAvailability();
-  }
+  let resolved = false;
+  let fulfilmentMode = 'collect';
+  let signedIn = false;
+  let signedInEmail = '';
 
 
-  function getDeliveryFee() {
-    const sub = parseFloat((qs('s-subtotal')?.textContent || '$0').replace(/[^0-9.]/g,'')) || 0;
-    if (checkoutState.fulfilmentMode !== 'delivery') return 0;
-    if (checkoutState.deliveryService === 'standard') {
-      return sub >= 149 ? 0 : 9.95;
-    }
-    return 14.95;
-  }
-
-  function updateDeliveryServiceUI() {
-    const showServices = checkoutState.fulfilmentMode === 'delivery' &&
-      (checkoutState.checkoutMode === 'guest' || checkoutState.addressValidationState === 'valid');
-    qs('delivery-service-section')?.classList.toggle('hidden', !showServices);
-    if (qs('delivery-option-standard')) qs('delivery-option-standard').classList.toggle('selected', checkoutState.deliveryService === 'standard');
-    if (qs('delivery-option-express')) qs('delivery-option-express').classList.toggle('selected', checkoutState.deliveryService === 'express');
-    const std = parseFloat((qs('s-subtotal')?.textContent || '$0').replace(/[^0-9.]/g,'')) || 0;
-    const stdFee = std >= 149 ? 0 : 9.95;
-    if (qs('delivery-option-standard-price')) qs('delivery-option-standard-price').textContent = stdFee === 0 ? 'FREE' : '$' + stdFee.toFixed(2);
-  }
-
-  function selectDeliveryService(service) {
-    checkoutState.deliveryService = service;
-    updateDeliveryServiceUI();
-    updateSummaryForMode();
-    updatePaymentAvailability();
-  }
-
-  function updatePaymentAvailability() {
-    const paymentPending = qs('payment-pending');
-    const paymentActive = qs('payment-active');
-    if (!checkoutState.resolved) {
-      paymentPending?.classList.remove('hidden');
-      paymentActive?.classList.add('hidden');
+  function updateSignedInContactBanner() {
+    const banner = document.getElementById('signedin-contact-banner');
+    const title = document.getElementById('signedin-contact-title');
+    const sub = document.getElementById('signedin-contact-sub');
+    if (!banner || !title || !sub) return;
+    if (!resolved || !signedIn) {
+      banner.classList.remove('show');
       return;
     }
-    const pathChosen = !!checkoutState.checkoutMode;
-    const validState =
-      checkoutState.fulfilmentMode === 'collect' ||
-      (checkoutState.checkoutMode === 'guest' && !!checkoutState.deliveryService) ||
-      (checkoutState.checkoutMode === 'signedIn' && checkoutState.addressValidationState === 'valid' && !!checkoutState.deliveryService);
-
-    paymentPending?.classList.toggle('hidden', pathChosen && validState);
-    paymentActive?.classList.toggle('hidden', !(pathChosen && validState));
-  }
-
-  function populateSignedInCollectContact() {
-    const profile = savedAddresses.find(a => a.id === 'work') || savedAddresses[0];
-    if (!profile) return;
-    if (qs('email')) qs('email').value = profile.email;
-    if (qs('fname')) qs('fname').value = profile.name.split(' ')[0] || '';
-    if (qs('lname')) qs('lname').value = profile.name.split(' ').slice(1).join(' ') || '';
-    if (qs('mobile')) qs('mobile').value = profile.phone || '';
-  }
-
-  function continueAsGuest() {
-    checkoutState.checkoutMode = 'guest';
-    qs('account-block').innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(0,159,227,0.06);border:1px solid rgba(0,159,227,0.2);border-radius:4px;font-family:var(--font);">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#009FE3" stroke-width="1.4"/><path d="M5 8l2.5 2.5L11 6" stroke="#009FE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span style="font-size:13px;font-weight:600;color:var(--navy);">Continuing as guest</span>
-        <button onclick="resetAccountBlock()" style="margin-left:auto;background:none;border:none;font-size:11px;font-weight:700;color:var(--txt-muted);cursor:pointer;font-family:var(--font);text-decoration:underline;">Change</button>
-      </div>`;
-    const nudge = qs('loyalty-nudge');
-    if (nudge) nudge.style.display = 'none';
-    updateContactView();
-  }
-
-  function resetAccountBlock() {
-    location.reload();
-  }
-
-  function handleSignIn() {
-    const email = qs('signin-email').value.trim();
-    const pass  = qs('signin-password').value.trim();
-    if (!email || !pass) {
-      qs('signin-password').style.borderColor = 'var(--sale-red)';
-      return;
-    }
-    checkoutState.checkoutMode = 'signedIn';
-    checkoutState.selectedAddressId = 'home';
-    qs('account-block').innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(12,37,76,0.04);border:1px solid rgba(12,37,76,0.14);border-radius:4px;font-family:var(--font);">
-        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#0C254C" stroke-width="1.4" stroke-linecap="round"/></svg>
-        <span style="font-size:13px;font-weight:600;color:var(--navy);">Signed in as <strong>${email}</strong></span>
-        <span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:rgba(246,193,0,0.15);border:1px solid rgba(246,193,0,0.3);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:700;color:#a07800;font-family:var(--font);">
-          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
-          338 points on this order
-        </span>
-        <button onclick="resetAccountBlock()" style="margin-left:8px;background:none;border:none;font-size:11px;font-weight:700;color:var(--txt-muted);cursor:pointer;font-family:var(--font);text-decoration:underline;">Change</button>
-      </div>`;
-    const nudge = qs('loyalty-nudge');
-    if (nudge) {
-      nudge.innerHTML = `
-        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#a07800" stroke-width="1.3"/><path d="M5 8l2.5 2.5L11 6" stroke="#a07800" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>You'll earn <span class="nudge-pts">338 points</span> on this order</span>`;
-    }
-    updateContactView();
-  }
-
-  function switchToGuest() {
-    checkoutState.checkoutMode = 'guest';
-    updateContactView();
-    const nudge = qs('loyalty-nudge');
-    if (nudge) nudge.style.display = 'none';
-  }
-
-  function focusAddressList() {
-    qs('saved-address-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }
-
-  function addNewAddress() {
-    alert('Add new address flow would open here. (stub)');
-  }
-
-  function editSelectedAddress() {
-    const selected = savedAddresses.find(a => a.id === checkoutState.selectedAddressId);
-    if (!selected) return;
-    alert('Edit address flow for ' + selected.label + ' would open here. (stub)');
-  }
-
-  function toggleSignIn() {
-    const panel = qs('signin-panel');
-    const btn = qs('signin-btn');
-    const open = panel.classList.toggle('open');
-    if (open) {
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Cancel';
-      setTimeout(() => qs('signin-email').focus(), 80);
+    banner.classList.add('show');
+    title.textContent = 'Signed in checkout';
+    if (fulfilmentMode === 'collect') {
+      sub.textContent = 'We've filled your collection contact details from your account. Collecting from Wetherill Park.';
     } else {
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Sign in';
+      sub.textContent = 'We've filled your contact details from your account. Check your delivery details below.';
     }
   }
 
-  function handleForgot() {
-    alert('Password reset link sent — check your email. (stub)');
-  }
-
-  function handleSSO(provider) {
-    alert('Redirecting to ' + provider + ' sign-in… (stub)');
-  }
-
-  function scrollToSignIn() {
-    const block = qs('account-block');
+  function switchToGuestFromBanner() {
+    signedIn = false;
+    signedInEmail = '';
+    guestChosen = true;
+    updateSignedInContactBanner();
+    const nudge = document.getElementById('loyalty-nudge');
+    if (nudge) nudge.style.display = 'none';
+    const block = document.getElementById('account-block');
     if (block) {
-      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      block.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(0,159,227,0.06);border:1px solid rgba(0,159,227,0.2);border-radius:4px;font-family:var(--font);">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#009FE3" stroke-width="1.4"/><path d="M5 8l2.5 2.5L11 6" stroke="#009FE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span style="font-size:13px;font-weight:600;color:var(--navy);">Continuing as guest</span>
+          <button onclick="resetAccountBlock()" style="margin-left:auto;background:none;border:none;font-size:11px;font-weight:700;color:var(--txt-muted);cursor:pointer;font-family:var(--font);text-decoration:underline;">Change</button>
+        </div>`;
     }
-  }
-
-  function checkEmailRecognition(val) {
-    const el = qs('email-recognition');
-    if (!el) return;
-    const hasAt = val.includes('@') && val.includes('.');
-    el.classList.toggle('show', hasAt && checkoutState.checkoutMode !== 'signedIn');
-  }
-
-  function markResolved(title, sub) {
-    checkoutState.resolved = true;
-    qs('basket-alert').classList.add('hidden');
-    qs('issue-section').classList.add('hidden');
-    qs('resolved-banner').classList.remove('hidden');
-    qs('resolved-title').textContent = title;
-    qs('resolved-sub').textContent = sub;
-    qs('account-block').classList.remove('hidden');
-    qs('contact-lock').classList.add('hidden');
-    qs('contact-form').classList.remove('hidden');
-    qs('payment-lock').classList.add('hidden');
-    qs('payment-form').classList.remove('hidden');
-    updateContactView();
-    updatePaymentAvailability();
-  }
-
-  function updateSummaryForMode() {
-    const sub = parseFloat((qs('s-subtotal').textContent || '$0').replace(/[^0-9.]/g,''));
-    if (checkoutState.fulfilmentMode === 'collect') {
-      qs('fulfilment-pill').className = 'fulfilment-pill pill-collect';
-      qs('fulfilment-pill').style.display = '';
-      qs('fulfilment-label').innerHTML = 'Click &amp; Collect &middot; Wetherill Park';
-      qs('s-delivery-row').classList.add('hidden');
-      qs('s-total').textContent = qs('s-subtotal').textContent;
-      qs('free-delivery-bar').style.display = 'none';
-      if (qs('cta-total')) qs('cta-total').textContent = qs('s-subtotal').textContent;
-    } else {
-      qs('fulfilment-pill').style.display = 'none';
-      qs('s-delivery-row').classList.remove('hidden');
-      const fee = getDeliveryFee();
-      const label = checkoutState.deliveryService === 'express' ? 'Express delivery' : 'Standard delivery';
-      if (qs('s-delivery-label')) qs('s-delivery-label').textContent = label;
-      qs('s-fulfilment').textContent = fee === 0 ? 'FREE' : '$' + fee.toFixed(2);
-      qs('s-fulfilment').style.color = fee === 0 ? 'var(--cyan)' : 'var(--txt-mid)';
-      qs('s-fulfilment').style.fontWeight = '700';
-      qs('s-total').textContent = '$' + (sub + fee).toFixed(2);
-      if (qs('cta-total')) qs('cta-total').textContent = '$' + (sub + fee).toFixed(2);
-      if (checkoutState.deliveryService === 'standard') {
-        const gap = Math.max(0, 149 - sub);
-        qs('free-delivery-bar').style.display = '';
-        qs('free-del-amount').textContent = '$' + gap.toFixed(2);
-        const pct = Math.min(100, (sub / 149 * 100)).toFixed(1);
-        qs('free-del-bar').style.width = pct + '%';
-      } else {
-        qs('free-delivery-bar').style.display = 'none';
-      }
-    }
-    updateDeliveryServiceUI();
   }
 
   function resolveCollect() {
-    checkoutState.fulfilmentMode = 'collect';
-    checkoutState.deliveryService = 'standard';
-    qs('card-collect').className = 'method-card selected';
-    qs('card-delivery').className = 'method-card';
-    if (qs('speaker-flag')) qs('speaker-flag').style.display = 'none';
     markResolved('Order updated to Click & Collect', 'Your full order will be ready to collect at Wetherill Park');
-    updateSummaryForMode();
-    updateContactView();
+    fulfilmentMode = 'collect';
+    document.getElementById('card-collect').className = 'method-card selected';
+    document.getElementById('card-delivery').className = 'method-card';
+    document.getElementById('delivery-address').classList.add('hidden');
+    document.getElementById('collect-address').classList.remove('hidden');
+    if (document.getElementById('speaker-flag')) document.getElementById('speaker-flag').style.display = 'none';
+    document.getElementById('fulfilment-pill').className = 'fulfilment-pill pill-collect';
+    document.getElementById('fulfilment-pill').style.display = '';
+    document.getElementById('fulfilment-label').innerHTML = 'Click &amp; Collect &middot; Wetherill Park';
+    document.getElementById('s-delivery-row').classList.add('hidden');
+    document.getElementById('s-total').textContent = '$337.80';
+    document.getElementById('free-delivery-bar').style.display = 'none';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$337.80';
+    updateSignedInContactBanner();
   }
 
   function resolveRemove() {
-    checkoutState.fulfilmentMode = 'delivery';
-    checkoutState.deliveryService = 'standard';
-    qs('item-speaker').style.display = 'none';
-    qs('item-count').textContent = '5 items';
-    qs('s-subtotal').textContent = '$292.85';
-    qs('card-delivery').className = 'method-card selected';
-    qs('card-collect').className = 'method-card';
-    markResolved('Item removed', 'Your remaining items are available for delivery — choose guest or sign in below');
-    updateSummaryForMode();
-    updateContactView();
+    markResolved('Item removed', 'Your remaining item is available for delivery — enter your details below');
+    fulfilmentMode = 'delivery';
+    document.getElementById('item-speaker').style.display = 'none';
+    document.getElementById('item-count').textContent = '5 items';
+    document.getElementById('s-subtotal').textContent = '$292.85';
+    document.getElementById('s-delivery-row').classList.remove('hidden');
+    document.getElementById('s-fulfilment').textContent = '$9.95';
+    document.getElementById('s-fulfilment').style.color = 'var(--txt-mid)';
+    document.getElementById('s-fulfilment').style.fontWeight = '600';
+    document.getElementById('s-total').textContent = '$302.80';
+    document.getElementById('fulfilment-pill').style.display = 'none';
+    document.getElementById('card-delivery').className = 'method-card selected';
+    document.getElementById('card-collect').className = 'method-card';
+    document.getElementById('delivery-address').classList.remove('hidden');
+    document.getElementById('collect-address').classList.add('hidden');
+    document.getElementById('free-delivery-bar').style.display = '';
+    document.getElementById('free-del-amount').textContent = '$0.00';
+    document.getElementById('free-del-bar').style.width = '100%';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$302.80';
+    updateSignedInContactBanner();
   }
 
   function editPostcode() {
@@ -1959,30 +1383,113 @@ body {
   }
 
   function selectCollect() {
-    checkoutState.fulfilmentMode = 'collect';
-    checkoutState.deliveryService = 'standard';
-    qs('card-collect').className = 'method-card selected';
-    qs('card-delivery').className = 'method-card';
-    if (!checkoutState.resolved) return resolveCollect();
-    updateSummaryForMode();
-    updateContactView();
+    // Always allow switching to collect
+    fulfilmentMode = 'collect';
+    // Visual state
+    document.getElementById('card-collect').className = 'method-card selected';
+    document.getElementById('card-delivery').className = 'method-card';
+    // Summary
+    document.getElementById('fulfilment-pill').className = 'fulfilment-pill pill-collect';
+    document.getElementById('fulfilment-pill').style.display = '';
+    document.getElementById('fulfilment-label').innerHTML = 'Click &amp; Collect &middot; Wetherill Park';
+    document.getElementById('s-delivery-row').classList.add('hidden');
+    document.getElementById('s-total').textContent = '$337.80';
+    document.getElementById('s-fulfilment').style.color = 'var(--cyan)';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$337.80';
+    document.getElementById('free-delivery-bar').style.display = 'none';
+    updateSignedInContactBanner();
+    // Address forms (if unlocked)
+    if (resolved) {
+      document.getElementById('delivery-address').classList.add('hidden');
+      document.getElementById('collect-address').classList.remove('hidden');
+    }
+    if (document.getElementById('speaker-flag')) document.getElementById('speaker-flag').style.display = 'none';
+    if (!resolved) {
+      // First time selecting collect resolves the issue
+      resolveCollect();
+    }
   }
 
   function selectDelivery() {
-    checkoutState.fulfilmentMode = 'delivery';
-    checkoutState.deliveryService = checkoutState.deliveryService || 'standard';
-    if (!checkoutState.resolved) {
-      qs('card-delivery').className = 'method-card blocked';
-      qs('card-collect').className = 'method-card recommended';
-      qs('basket-alert').classList.remove('hidden');
-      qs('issue-section').classList.remove('hidden');
-      qs('resolved-banner').classList.add('hidden');
-      return;
+    fulfilmentMode = 'delivery';
+    document.getElementById('card-delivery').className = 'method-card blocked';
+    document.getElementById('card-collect').className = 'method-card recommended';
+    // Restore error state — show basket alert and issue card again
+    if (!resolved) {
+      document.getElementById('basket-alert').classList.remove('hidden');
+      document.getElementById('issue-section').classList.remove('hidden');
+      document.getElementById('resolved-banner').classList.add('hidden');
+    } else {
+      // Already resolved — just switch mode, show delivery address
+      document.getElementById('basket-alert').classList.add('hidden');
+      document.getElementById('issue-section').classList.add('hidden');
     }
-    qs('card-delivery').className = 'method-card selected';
-    qs('card-collect').className = 'method-card';
-    updateSummaryForMode();
-    updateContactView();
+    // Summary
+    document.getElementById('fulfilment-pill').style.display = 'none';
+    document.getElementById('s-delivery-row').classList.remove('hidden');
+    document.getElementById('s-fulfilment').textContent = '$9.95';
+    document.getElementById('s-fulfilment').style.color = 'var(--txt-mid)';
+    document.getElementById('s-fulfilment').style.fontWeight = '600';
+    const sub = parseFloat((document.getElementById('s-subtotal').textContent || '$0').replace(/[^0-9.]/g,''));
+    document.getElementById('s-total').textContent = '$' + (sub + 9.95).toFixed(2);
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$' + (sub + 9.95).toFixed(2);
+    updateSignedInContactBanner();
+    // Free delivery bar — calculate gap from $149
+    const gap = Math.max(0, 149 - sub);
+    document.getElementById('free-delivery-bar').style.display = '';
+    document.getElementById('free-del-amount').textContent = '$' + gap.toFixed(2);
+    const pct = Math.min(100, (sub / 149 * 100)).toFixed(1);
+    document.getElementById('free-del-bar').style.width = pct + '%';
+    // Address forms
+    if (resolved) {
+      document.getElementById('collect-address').classList.add('hidden');
+      document.getElementById('delivery-address').classList.remove('hidden');
+    }
+    if (!resolved) {
+      resolveRemove();
+    }
+  }
+
+  function markResolved(title, sub) {
+    resolved = true;
+    document.getElementById('basket-alert').classList.add('hidden');
+    document.getElementById('issue-section').classList.add('hidden');
+    document.getElementById('resolved-banner').classList.remove('hidden');
+    document.getElementById('resolved-title').textContent = title;
+    document.getElementById('resolved-sub').textContent = sub;
+    document.getElementById('account-block').classList.remove('hidden');
+    document.getElementById('contact-lock').classList.add('hidden');
+    document.getElementById('contact-form').classList.remove('hidden');
+    document.getElementById('payment-lock').classList.add('hidden');
+    document.getElementById('payment-form').classList.remove('hidden');
+    updateSignedInContactBanner();
+  }
+
+  function updateSummaryCollect() {
+    // handled inline in resolveCollect now — kept for compatibility
+    document.getElementById('s-subtotal').textContent = '$337.80';
+    document.getElementById('s-total').textContent = '$337.80';
+    document.getElementById('s-delivery-row').classList.add('hidden');
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$337.80';
+  }
+
+  const cardEl = document.getElementById('cardnum');
+  if (cardEl) {
+    cardEl.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,16);
+      e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
+      const b = document.getElementById('card-brand');
+      b.textContent = v.startsWith('4') ? 'VISA' : /^5[1-5]|^2[2-7]/.test(v) ? 'MC' : v.startsWith('3') ? 'AMEX' : '';
+    });
+  }
+
+  const expEl = document.getElementById('expiry');
+  if (expEl) {
+    expEl.addEventListener('input', e => {
+      let v = e.target.value.replace(/\D/g,'').slice(0,4);
+      if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
+      e.target.value = v;
+    });
   }
 
   function cartQty(btn, dir) {
@@ -1992,7 +1499,7 @@ body {
   }
 
   function handleOrder() {
-    const btn = qs('place-btn');
+    const btn = document.getElementById('place-btn');
     btn.textContent = 'Processing…';
     btn.style.opacity = '0.7';
     btn.disabled = true;
@@ -2004,28 +1511,112 @@ body {
     }, 1600);
   }
 
-  const cardEl = qs('cardnum');
-  if (cardEl) {
-    cardEl.addEventListener('input', e => {
-      let v = e.target.value.replace(/\D/g,'').slice(0,16);
-      e.target.value = v.replace(/(.{4})/g,'$1 ').trim();
-      const b = qs('card-brand');
-      b.textContent = v.startsWith('4') ? 'VISA' : /^5[1-5]|^2[2-7]/.test(v) ? 'MC' : v.startsWith('3') ? 'AMEX' : '';
-    });
+  // ── ACCOUNT / LOYALTY BLOCK (v2.7) ────────────────────────────────────────
+  let signinOpen = false;
+  let guestChosen = false;
+
+  function toggleSignIn() {
+    signinOpen = !signinOpen;
+    const panel = document.getElementById('signin-panel');
+    const btn   = document.getElementById('signin-btn');
+    panel.classList.toggle('open', signinOpen);
+    btn.textContent = signinOpen ? '✕  Cancel' : '  Sign in';
+    if (signinOpen) {
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg> Cancel';
+      setTimeout(() => document.getElementById('signin-email').focus(), 80);
+    } else {
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Sign in';
+    }
   }
 
-  const expEl = qs('expiry');
-  if (expEl) {
-    expEl.addEventListener('input', e => {
-      let v = e.target.value.replace(/\D/g,'').slice(0,4);
-      if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
-      e.target.value = v;
-    });
+  function continueAsGuest() {
+    guestChosen = true;
+    signedIn = false;
+    signedInEmail = '';
+    const block = document.getElementById('account-block');
+    // Collapse to a slim confirmed state
+    block.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(0,159,227,0.06);border:1px solid rgba(0,159,227,0.2);border-radius:4px;font-family:var(--font);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#009FE3" stroke-width="1.4"/><path d="M5 8l2.5 2.5L11 6" stroke="#009FE3" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span style="font-size:13px;font-weight:600;color:var(--navy);">Continuing as guest</span>
+        <button onclick="resetAccountBlock()" style="margin-left:auto;background:none;border:none;font-size:11px;font-weight:700;color:var(--txt-muted);cursor:pointer;font-family:var(--font);text-decoration:underline;">Change</button>
+      </div>`;
+    // Hide loyalty nudge in summary
+    const nudge = document.getElementById('loyalty-nudge');
+    if (nudge) nudge.style.display = 'none';
+    updateSignedInContactBanner();
   }
 
-  // Initialize pending state after page load.
-  updatePaymentAvailability();
+  function resetAccountBlock() {
+    guestChosen = false;
+    signedIn = false;
+    signedInEmail = '';
+    location.reload(); // simplest way to reset the whole block
+  }
+
+  function handleSignIn() {
+    const email = document.getElementById('signin-email').value.trim();
+    const pass  = document.getElementById('signin-password').value.trim();
+    if (!email || !pass) {
+      document.getElementById('signin-password').style.borderColor = 'var(--sale-red)';
+      return;
+    }
+    signedIn = true;
+    guestChosen = false;
+    signedInEmail = email;
+    // Mock: collapse to signed-in state
+    const block = document.getElementById('account-block');
+    block.innerHTML = `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:rgba(12,37,76,0.04);border:1px solid rgba(12,37,76,0.14);border-radius:4px;font-family:var(--font);">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2a3 3 0 100 6 3 3 0 000-6zM2 13c0-2.2 2.7-4 6-4s6 1.8 6 4" stroke="#0C254C" stroke-width="1.4" stroke-linecap="round"/></svg>
+        <span style="font-size:13px;font-weight:600;color:var(--navy);">Signed in as <strong>${email}</strong></span>
+        <span style="margin-left:auto;display:inline-flex;align-items:center;gap:5px;background:rgba(246,193,0,0.15);border:1px solid rgba(246,193,0,0.3);border-radius:4px;padding:3px 10px;font-size:11px;font-weight:700;color:#a07800;font-family:var(--font);">
+          <svg width="11" height="11" viewBox="0 0 16 16" fill="none"><path d="M8 1l2 4.5H15l-3.5 2.8 1.3 4.2L8 9.8 3.2 12.5l1.3-4.2L1 5.5h5z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          338 points on this order
+        </span>
+      </div>`;
+    // Update loyalty nudge in summary to confirmed
+    const nudge = document.getElementById('loyalty-nudge');
+    if (nudge) {
+      nudge.innerHTML = `
+        <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#a07800" stroke-width="1.3"/><path d="M5 8l2.5 2.5L11 6" stroke="#a07800" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>You'll earn <span class="nudge-pts">338 points</span> on this order</span>`;
+    }
+    // Pre-fill contact form
+    const contactEmail = document.getElementById('email');
+    if (contactEmail) contactEmail.value = email;
+    const fname = document.getElementById('fname'); if (fname) fname.value = 'Ricco';
+    const lname = document.getElementById('lname'); if (lname) lname.value = 'Zorzo';
+    const mobile = document.getElementById('mobile'); if (mobile) mobile.value = '0434 491 006';
+    updateSignedInContactBanner();
+  }
+
+  function handleForgot() {
+    alert('Password reset link sent — check your email. (stub)');
+  }
+
+  function handleSSO(provider) {
+    alert('Redirecting to ' + provider + ' sign-in… (stub)');
+  }
+
+  function scrollToSignIn() {
+    const block = document.getElementById('account-block');
+    if (block) {
+      block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => {
+        if (!signinOpen) toggleSignIn();
+      }, 400);
+    }
+  }
+
+  // Email recognition — show hint for any email that looks real
+  function checkEmailRecognition(val) {
+    const el = document.getElementById('email-recognition');
+    if (!el) return;
+    const hasAt = val.includes('@') && val.includes('.');
+    el.classList.toggle('show', hasAt && !guestChosen);
+  }
+
 </script>
-
 </body>
 </html>
