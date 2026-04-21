@@ -29,6 +29,16 @@
     - Full PDP two-row nav + footer transplanted
     - Figtree font, all radii 4px, Jaycar SVG logo
 
+  v2.6.0 | 2026-04-21 | Error state on delivery revert, summary UX upgrades
+    - [FIXED]   Switching back to delivery restores basket alert + issue card
+    - [CHANGED] Cart thumbnails enlarged (70×70px)
+    - [NEW]     Qty stepper on each cart item in order summary
+    - [NEW]     Info tooltip on clearance item flag (PDP-style)
+    - [CHANGED] Summary font explicitly Figtree
+    - [NEW]     4 additional cart items (MB3866, QM1598, SB2486, TL4980)
+    - [CHANGED] Free delivery threshold: $100 → $149
+    - [UPDATED] Subtotals recalculated for full 6-item cart
+
   v2.5.0 | 2026-04-21 | Icons, product images, summary UX, delivery toggle
     - [CHANGED] Delivery icon → truck.svg from repo
     - [CHANGED] C&C icon → building-store.svg from repo
@@ -78,7 +88,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="version" content="2.5.0">
+<meta name="version" content="2.6.0">
 <meta name="last-updated" content="2026-04-21">
 <title>Checkout — Jaycar Electronics</title>
 <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -399,17 +409,28 @@ body {
 .summary-head { background: var(--navy); padding: 14px 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 3px solid var(--teal); } /* Teal #56BFCA */
 .summary-head-title { font-size: 10px; font-weight: 800; color: var(--white); text-transform: uppercase; letter-spacing: 0.12em; }
 .summary-head-count { font-size: 11px; font-weight: 800; color: var(--teal); } /* Teal */
-.summary-body { padding: 16px 18px; }
+.summary-body { padding: 16px 18px; font-family: var(--font); }
 
 .cart-item { display: flex; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
 .cart-item:last-child { border-bottom: none; }
-.cart-thumb { width: 50px; height: 50px; border-radius: 4px; background: var(--warm-grey); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
+.cart-thumb { width: 70px; height: 70px; border-radius: 4px; background: var(--warm-grey); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; position: relative; }
 .cart-qty { position: absolute; top: -6px; right: -6px; background: var(--navy); color: var(--white); width: 18px; height: 18px; border-radius: 50%; font-size: 9px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 .cart-info { flex: 1; min-width: 0; }
-.cart-name { font-size: 12px; font-weight: 700; color: var(--navy); line-height: 1.35; }
+.cart-name { font-size: 12px; font-weight: 700; color: var(--navy); line-height: 1.35; font-family: var(--font); }
 .cart-cat  { font-size: 10.5px; color: var(--txt-muted); font-family: monospace; margin-top: 2px; }
-.cart-flag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bdr); padding: 2px 7px; border-radius: 4px; margin-top: 4px; }
+.cart-flag { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 700; color: var(--orange); background: var(--orange-bg); border: 1px solid var(--orange-bdr); padding: 2px 7px; border-radius: 4px; margin-top: 4px; position: relative; cursor: default; }
+.cart-flag .flag-tooltip { display: none; position: absolute; bottom: calc(100% + 6px); left: 0; background: var(--navy); color: white; font-size: 11px; font-weight: 400; padding: 5px 10px; border-radius: 4px; white-space: nowrap; z-index: 200; pointer-events: none; font-family: var(--font); }
+.cart-flag .flag-tooltip::after { content: ""; position: absolute; top: 100%; left: 10px; border: 5px solid transparent; border-top-color: var(--navy); }
+.cart-flag:hover .flag-tooltip { display: block; }
 .cart-price { font-size: 13px; font-weight: 700; color: var(--navy); font-family: monospace; flex-shrink: 0; }
+/* Cart item qty stepper */
+.cart-stepper { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
+.cart-qty-btn { width: 20px; height: 20px; border: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; line-height: 1; transition: opacity 0.15s; }
+.cart-qty-btn.minus { background: #c8c8cc; color: white; }
+.cart-qty-btn.minus:hover { opacity: 0.85; }
+.cart-qty-btn.plus  { background: var(--navy); color: white; }
+.cart-qty-btn.plus:hover  { opacity: 0.85; }
+.cart-qty-val { min-width: 22px; text-align: center; font-size: 11px; font-weight: 700; color: var(--navy); font-family: var(--font); }
 
 .summary-divider { height: 0.5px; background: var(--border); margin: 12px 0; }
 .summary-line { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; font-weight: 600; color: var(--txt-mid); margin-bottom: 6px; }
@@ -494,7 +515,8 @@ body {
         <span style="color:#8692A6;">v2.0</span><span>Fulfilment-first redesign</span>
         <span style="color:#8692A6;">v2.1</span><span>Design notes to version control</span>
         <span style="color:#8692A6;">v2.2</span><span>PDP nav/footer, Figtree, 4px radii</span>
-        <span style="color:#8692A6;font-weight:700;">v2.5</span><span style="font-weight:700;">Icons, product images, summary UX ← current</span>
+        <span style="color:#8692A6;font-weight:700;">v2.6</span><span style="font-weight:700;">Error state, summary UX, more cart items ← current</span>
+        <span style="color:#8692A6;">v2.5</span><span>Icons, product images, delivery toggle</span>
         <span style="color:#8692A6;">v2.4</span><span>Header trimmed, background white</span>
         <span style="color:#8692A6;">v2.3</span><span>Colour audit to brand guide 2018</span>
       </div>
@@ -782,7 +804,7 @@ body {
         </div>
 
         <button class="btn btn-primary btn-full btn-cta animate-in" id="place-btn" onclick="handleOrder()" style="margin-top:4px;">
-          Place order &nbsp;·&nbsp; <span id="cta-total">$74.90</span>
+          Place order &nbsp;·&nbsp; <span id="cta-total">$337.80</span>
         </button>
         <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:12px;flex-wrap:wrap;">
           <span style="display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt-muted);font-weight:700;">
@@ -808,7 +830,7 @@ body {
     <div class="summary-card">
       <div class="summary-head">
         <span class="summary-head-title">Order summary</span>
-        <span class="summary-head-count" id="item-count">2 items</span>
+        <span class="summary-head-count" id="item-count">6 items</span>
       </div>
       <div class="summary-body">
 
@@ -817,6 +839,7 @@ body {
           <span id="fulfilment-label">Click &amp; Collect · Wetherill Park</span>
         </div>
 
+        <!-- Item 1: XC5262 Speakers (clearance / issue) -->
         <div class="cart-item" id="item-speaker">
           <div class="cart-thumb" style="overflow:hidden;padding:3px;">
             <div class="cart-qty">1</div>
@@ -826,13 +849,20 @@ body {
             <div class="cart-name">2in1 Split Wireless Speakers 10W</div>
             <div class="cart-cat">XC5262</div>
             <div class="cart-flag" id="speaker-flag">
-              <svg width="9" height="9" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v4M8 11v1" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+              <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/icons/info-circle.svg" width="10" height="10" alt="" style="opacity:0.7;flex-shrink:0;"/>
               Clearance · delivery issue
+              <span class="flag-tooltip">Product not available at all stores</span>
+            </div>
+            <div class="cart-stepper">
+              <button class="cart-qty-btn minus" onclick="cartQty(this,-1)">−</button>
+              <span class="cart-qty-val">1</span>
+              <button class="cart-qty-btn plus"  onclick="cartQty(this,1)">+</button>
             </div>
           </div>
           <div class="cart-price">$44.95</div>
         </div>
 
+        <!-- Item 2: NS3005 Solder -->
         <div class="cart-item" id="item-solder">
           <div class="cart-thumb" style="overflow:hidden;padding:3px;">
             <div class="cart-qty">1</div>
@@ -841,15 +871,92 @@ body {
           <div class="cart-info">
             <div class="cart-name">0.71mm Duratech Solder 200gm</div>
             <div class="cart-cat">NS3005</div>
+            <div class="cart-stepper">
+              <button class="cart-qty-btn minus" onclick="cartQty(this,-1)">−</button>
+              <span class="cart-qty-val">1</span>
+              <button class="cart-qty-btn plus"  onclick="cartQty(this,1)">+</button>
+            </div>
           </div>
           <div class="cart-price">$29.95</div>
         </div>
 
+        <!-- Item 3: MB3866 Power Bank -->
+        <div class="cart-item">
+          <div class="cart-thumb" style="overflow:hidden;padding:3px;">
+            <div class="cart-qty">1</div>
+            <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/MB3866_5000mah-magnetic-wireless-charging-power-bank_158002.webp" alt="MB3866" style="width:100%;height:100%;object-fit:contain;"/>
+          </div>
+          <div class="cart-info">
+            <div class="cart-name">5000mAh Magnetic Wireless Power Bank</div>
+            <div class="cart-cat">MB3866</div>
+            <div class="cart-stepper">
+              <button class="cart-qty-btn minus" onclick="cartQty(this,-1)">−</button>
+              <span class="cart-qty-val">1</span>
+              <button class="cart-qty-btn plus"  onclick="cartQty(this,1)">+</button>
+            </div>
+          </div>
+          <div class="cart-price">$39.95</div>
+        </div>
+
+        <!-- Item 4: QM1598 Sound Level Meter -->
+        <div class="cart-item">
+          <div class="cart-thumb" style="overflow:hidden;padding:3px;">
+            <div class="cart-qty">1</div>
+            <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/QM1598_pro-sound-level-meter-with-calibrator_93342.webp" alt="QM1598" style="width:100%;height:100%;object-fit:contain;"/>
+          </div>
+          <div class="cart-info">
+            <div class="cart-name">Pro Sound Level Meter with Calibrator</div>
+            <div class="cart-cat">QM1598</div>
+            <div class="cart-stepper">
+              <button class="cart-qty-btn minus" onclick="cartQty(this,-1)">−</button>
+              <span class="cart-qty-val">1</span>
+              <button class="cart-qty-btn plus"  onclick="cartQty(this,1)">+</button>
+            </div>
+          </div>
+          <div class="cart-price">$79.00</div>
+        </div>
+
+        <!-- Item 5: SB2486 Speakers (second unit) -->
+        <div class="cart-item">
+          <div class="cart-thumb" style="overflow:hidden;padding:3px;">
+            <div class="cart-qty">1</div>
+            <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/SB2486%202.png" alt="SB2486" style="width:100%;height:100%;object-fit:contain;"/>
+          </div>
+          <div class="cart-info">
+            <div class="cart-name">Bluetooth Wireless Speaker IPX6</div>
+            <div class="cart-cat">SB2486</div>
+            <div class="cart-stepper">
+              <button class="cart-qty-btn minus" onclick="cartQty(this,-1)">−</button>
+              <span class="cart-qty-val">1</span>
+              <button class="cart-qty-btn plus"  onclick="cartQty(this,1)">+</button>
+            </div>
+          </div>
+          <div class="cart-price">$44.95</div>
+        </div>
+
+        <!-- Item 6: TL4980 3D Printer -->
+        <div class="cart-item">
+          <div class="cart-thumb" style="overflow:hidden;padding:3px;">
+            <div class="cart-qty">1</div>
+            <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/TL4980_elegoo-centauri-carbon-3d-filament-printer_159296.webp" alt="TL4980" style="width:100%;height:100%;object-fit:contain;"/>
+          </div>
+          <div class="cart-info">
+            <div class="cart-name">Elegoo Centauri Carbon 3D Filament Printer</div>
+            <div class="cart-cat">TL4980</div>
+            <div class="cart-stepper">
+              <button class="cart-qty-btn minus" onclick="cartQty(this,-1)">−</button>
+              <span class="cart-qty-val">1</span>
+              <button class="cart-qty-btn plus"  onclick="cartQty(this,1)">+</button>
+            </div>
+          </div>
+          <div class="cart-price">$99.00</div>
+        </div>
+
         <div class="summary-divider"></div>
-        <div class="summary-line"><span>Subtotal</span><span class="val" id="s-subtotal">$74.90</span></div>
+        <div class="summary-line"><span>Subtotal</span><span class="val" id="s-subtotal">$337.80</span></div>
         <div class="summary-line hidden" id="s-delivery-row"><span>Delivery</span><span class="val" id="s-fulfilment" style="font-weight:700;">$9.95</span></div>
-        <div class="summary-line total"><span>Grand total</span><span class="val" id="s-total">$74.90</span></div>
-        <div class="summary-line gst"><span>Includes GST</span><span class="val">$6.81</span></div>
+        <div class="summary-line total"><span>Grand total</span><span class="val" id="s-total">$337.80</span></div>
+        <div class="summary-line gst"><span>Includes GST</span><span class="val">$30.71</span></div>
 
       </div>
     </div>
@@ -858,16 +965,16 @@ body {
     <div id="free-delivery-bar" style="display:none;margin-top:12px;background:#fff;border:1px solid #E0E0E0;border-radius:4px;padding:14px 16px;box-shadow:0 1px 3px rgba(12,37,76,0.06);">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
         <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/icons/truck.svg" width="16" height="16" alt="" style="opacity:0.7;"/>
-        <span style="font-size:12px;font-weight:700;color:#0C254C;">Spend <strong id="free-del-amount">$25.10</strong> more for free standard delivery</span>
-        <div style="margin-left:auto;position:relative;cursor:pointer;" title="Free standard delivery on orders over $100">
+        <span style="font-size:12px;font-weight:700;color:#0C254C;">Spend <strong id="free-del-amount">$0.00</strong> more for free standard delivery</span>
+        <div style="margin-left:auto;position:relative;cursor:pointer;" title="Free standard delivery on orders over $149">
           <img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/icons/info-circle.svg" width="15" height="15" alt="info" style="opacity:0.45;display:block;"/>
         </div>
       </div>
       <div style="height:6px;background:#E0E0E0;border-radius:3px;overflow:hidden;">
-        <div id="free-del-bar" style="height:100%;width:75%;background:#009FE3;border-radius:3px;transition:width 0.4s ease;"></div>
+        <div id="free-del-bar" style="height:100%;width:100%;background:#009FE3;border-radius:3px;transition:width 0.4s ease;"></div>
       </div>
       <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:10.5px;color:#8692A6;font-weight:600;">
-        <span>$0</span><span>$100 free delivery</span>
+        <span>$0</span><span>$149 free delivery</span>
       </div>
     </div>
   </aside>
@@ -957,29 +1064,31 @@ body {
     document.getElementById('fulfilment-pill').style.display = '';
     document.getElementById('fulfilment-label').innerHTML = 'Click &amp; Collect &middot; Wetherill Park';
     document.getElementById('s-delivery-row').classList.add('hidden');
-    document.getElementById('s-total').textContent = '$74.90';
+    document.getElementById('s-total').textContent = '$337.80';
     document.getElementById('free-delivery-bar').style.display = 'none';
-    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$74.90';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$337.80';
   }
 
   function resolveRemove() {
     markResolved('Item removed', 'Your remaining item is available for delivery — enter your details below');
     fulfilmentMode = 'delivery';
     document.getElementById('item-speaker').style.display = 'none';
-    document.getElementById('item-count').textContent = '1 item';
-    document.getElementById('s-subtotal').textContent = '$29.95';
+    document.getElementById('item-count').textContent = '5 items';
+    document.getElementById('s-subtotal').textContent = '$292.85';
     document.getElementById('s-delivery-row').classList.remove('hidden');
     document.getElementById('s-fulfilment').textContent = '$9.95';
     document.getElementById('s-fulfilment').style.color = 'var(--txt-mid)';
     document.getElementById('s-fulfilment').style.fontWeight = '600';
-    document.getElementById('s-total').textContent = '$39.90';
+    document.getElementById('s-total').textContent = '$302.80';
     document.getElementById('fulfilment-pill').style.display = 'none';
     document.getElementById('card-delivery').className = 'method-card selected';
     document.getElementById('card-collect').className = 'method-card';
     document.getElementById('delivery-address').classList.remove('hidden');
     document.getElementById('collect-address').classList.add('hidden');
     document.getElementById('free-delivery-bar').style.display = '';
-    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$39.90';
+    document.getElementById('free-del-amount').textContent = '$0.00';
+    document.getElementById('free-del-bar').style.width = '100%';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$302.80';
   }
 
   function editPostcode() {
@@ -1001,9 +1110,9 @@ body {
     document.getElementById('fulfilment-pill').style.display = '';
     document.getElementById('fulfilment-label').innerHTML = 'Click &amp; Collect &middot; Wetherill Park';
     document.getElementById('s-delivery-row').classList.add('hidden');
-    document.getElementById('s-total').textContent = '$74.90';
+    document.getElementById('s-total').textContent = '$337.80';
     document.getElementById('s-fulfilment').style.color = 'var(--cyan)';
-    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$74.90';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$337.80';
     document.getElementById('free-delivery-bar').style.display = 'none';
     // Address forms (if unlocked)
     if (resolved) {
@@ -1018,10 +1127,19 @@ body {
   }
 
   function selectDelivery() {
-    // Always allow switching to delivery
     fulfilmentMode = 'delivery';
-    document.getElementById('card-delivery').className = 'method-card selected';
-    document.getElementById('card-collect').className = 'method-card';
+    document.getElementById('card-delivery').className = 'method-card blocked';
+    document.getElementById('card-collect').className = 'method-card recommended';
+    // Restore error state — show basket alert and issue card again
+    if (!resolved) {
+      document.getElementById('basket-alert').classList.remove('hidden');
+      document.getElementById('issue-section').classList.remove('hidden');
+      document.getElementById('resolved-banner').classList.add('hidden');
+    } else {
+      // Already resolved — just switch mode, show delivery address
+      document.getElementById('basket-alert').classList.add('hidden');
+      document.getElementById('issue-section').classList.add('hidden');
+    }
     // Summary
     document.getElementById('fulfilment-pill').style.display = 'none';
     document.getElementById('s-delivery-row').classList.remove('hidden');
@@ -1031,8 +1149,13 @@ body {
     const sub = parseFloat((document.getElementById('s-subtotal').textContent || '$0').replace(/[^0-9.]/g,''));
     document.getElementById('s-total').textContent = '$' + (sub + 9.95).toFixed(2);
     if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$' + (sub + 9.95).toFixed(2);
+    // Free delivery bar — calculate gap from $149
+    const gap = Math.max(0, 149 - sub);
     document.getElementById('free-delivery-bar').style.display = '';
-    // Address forms (if unlocked)
+    document.getElementById('free-del-amount').textContent = '$' + gap.toFixed(2);
+    const pct = Math.min(100, (sub / 149 * 100)).toFixed(1);
+    document.getElementById('free-del-bar').style.width = pct + '%';
+    // Address forms
     if (resolved) {
       document.getElementById('collect-address').classList.add('hidden');
       document.getElementById('delivery-address').classList.remove('hidden');
@@ -1057,10 +1180,10 @@ body {
 
   function updateSummaryCollect() {
     // handled inline in resolveCollect now — kept for compatibility
-    document.getElementById('s-subtotal').textContent = '$74.90';
-    document.getElementById('s-total').textContent = '$74.90';
+    document.getElementById('s-subtotal').textContent = '$337.80';
+    document.getElementById('s-total').textContent = '$337.80';
     document.getElementById('s-delivery-row').classList.add('hidden');
-    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$74.90';
+    if (document.getElementById('cta-total')) document.getElementById('cta-total').textContent = '$337.80';
   }
 
   const cardEl = document.getElementById('cardnum');
@@ -1080,6 +1203,12 @@ body {
       if (v.length >= 3) v = v.slice(0,2) + ' / ' + v.slice(2);
       e.target.value = v;
     });
+  }
+
+  function cartQty(btn, dir) {
+    const valEl = btn.parentElement.querySelector('.cart-qty-val');
+    let v = Math.max(1, parseInt(valEl.textContent) + dir);
+    valEl.textContent = v;
   }
 
   function handleOrder() {
