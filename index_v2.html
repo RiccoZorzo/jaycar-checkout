@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="version" content="3.2.0" />
+<meta name="last-updated" content="2026-04-21" />
+<title>Checkout — Jaycar Electronics</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0C254C;
+  --orange:#F18805;
+  --cyan:#009FE3;
+  --teal:#56BFCA;
+  --gold:#F6C100;
+  --sale-red:#CF0B2A;
+  --bg:#f4f6f8;
+  --surface:#ffffff;
+  --surface-soft:#f8fafc;
+  --border:#dde3ea;
+  --border-strong:#cbd5df;
+  --text:#132033;
+  --muted:#66758a;
+  --success:#1f9d55;
+  --radius:6px;
+  --shadow:0 2px 8px rgba(12,37,76,.06);
+  --font:'Figtree',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.45}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+.site-header{height:68px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:20;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.site-header img.logo{height:30px}
+.header-icons{display:flex;gap:24px;color:#fff;font-size:10px;font-weight:600;align-items:center}
+.header-icons .ico{display:flex;flex-direction:column;align-items:center;gap:4px;opacity:.92}
+.header-icons .ico svg{width:22px;height:22px}
+.progress-bar{background:#17335f;height:42px;display:flex;align-items:center;padding:0 28px;border-bottom:3px solid var(--teal);gap:10px}
+.p-step{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:800;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em}
+.p-step.active{color:#fff}.p-step.done{color:var(--teal)}
+.p-num{width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800}
+.p-step.active .p-num{background:var(--orange);border-color:var(--orange);color:var(--navy)}
+.p-step.done .p-num{background:var(--teal);border-color:var(--teal);color:var(--navy)}
+.p-div{width:24px;height:1px;background:rgba(255,255,255,.18)}
+.checkout-wrap{max-width:1500px;margin:0 auto;padding:24px 24px 40px}
+.checkout-grid{display:grid;grid-template-columns:1.05fr 1fr .9fr;gap:24px;align-items:start}
+.checkout-title{font-size:18px;font-weight:800;margin-bottom:16px;color:var(--navy)}
+.small-note{font-size:12px;color:var(--muted);margin-bottom:16px}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow)}
+.panel-pad{padding:16px}
+.section{margin-bottom:18px}.section h3{font-size:15px;font-weight:800;margin-bottom:12px;color:var(--navy)}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
+.badge-teal{background:rgba(86,191,202,.12);color:var(--navy);border:1px solid rgba(86,191,202,.25)}
+.badge-orange{background:rgba(241,136,5,.1);color:#8a4d00;border:1px solid rgba(241,136,5,.25)}
+.bag-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.bag-item{display:grid;grid-template-columns:92px 1fr;gap:14px;padding:16px 0;border-top:1px solid var(--border)}
+.bag-item:first-of-type{border-top:none}
+.bag-thumb{width:92px;height:92px;background:#eef2f6;border:1px solid var(--border);border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.bag-thumb img{width:100%;height:100%;object-fit:contain}
+.bag-name{font-size:14px;font-weight:800;margin-bottom:2px;color:#162236}.bag-sub{font-size:12px;color:#3f4d62;margin-bottom:4px}.bag-price{font-size:14px;font-weight:800;margin-bottom:4px}.bag-meta{font-size:12px;color:var(--muted);margin-bottom:8px}
+.bag-links{display:flex;gap:14px;font-size:12px;font-weight:700;color:#243042;margin-bottom:8px}
+.bag-actions{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.field-sm{display:flex;flex-direction:column;gap:4px}.field-sm label{font-size:11px;font-weight:700;color:#546274}
+.select-sm{height:36px;border:1px solid var(--border-strong);border-radius:4px;background:#fff;padding:0 12px;min-width:84px}
+.low-stock{display:inline-flex;align-items:center;gap:6px;background:#fbf1e9;color:#5b4332;border-radius:4px;padding:6px 10px;font-size:12px;margin-top:10px}
+.review-alert{margin-bottom:14px;background:#fff7ef;border:1px solid rgba(241,136,5,.25);border-left:4px solid var(--orange);padding:12px 14px;border-radius:4px}
+.review-alert strong{display:block;font-size:13px;color:#6f4304;margin-bottom:3px}.review-alert span{font-size:12px;color:#6c7280}
+.toggle{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
+.toggle button{height:40px;border:none;background:#f7f9fb;font-weight:800;font-size:12px;color:#69788c;cursor:pointer;text-transform:uppercase;letter-spacing:.05em}
+.toggle button.active{background:#fff;color:var(--navy);box-shadow:inset 0 -3px 0 var(--teal)}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.form-group{margin-bottom:12px}.form-group:last-child{margin-bottom:0}
+.form-label{display:block;font-size:12px;font-weight:800;color:#202c3d;margin-bottom:6px}.form-label .opt{font-weight:500;color:var(--muted)}
+.input,.select{width:100%;height:40px;border:1px solid var(--border-strong);border-radius:4px;padding:0 12px;background:#fff}.input:focus,.select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px rgba(86,191,202,.14)}
+.inline-phone{display:grid;grid-template-columns:72px 1fr;gap:8px}
+.account-strip{display:flex;justify-content:space-between;align-items:center;background:#f7fbff;border:1px solid #dbe8f4;border-radius:4px;padding:12px;margin-bottom:12px;gap:10px}.account-strip strong{font-size:13px;color:var(--navy)}.account-strip span{font-size:12px;color:var(--muted)}
+.btn{border:none;border-radius:4px;height:38px;padding:0 16px;font-weight:800;font-size:12px;cursor:pointer}.btn-navy{background:var(--navy);color:#fff}.btn-orange{background:var(--orange);color:#fff}.btn-ghost{background:#fff;border:1px solid var(--border-strong);color:#243042}
+.saved-addresses{display:grid;gap:10px;margin-bottom:12px}.addr-card{border:1px solid var(--border-strong);border-radius:4px;padding:12px;display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:start;cursor:pointer;background:#fff}.addr-card.active{border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan);background:#f8fcff}.addr-card input{margin-top:3px}.addr-title{font-size:13px;font-weight:800;color:#182131}.addr-copy{font-size:12px;color:#4a5568;margin-top:2px}.addr-tag{font-size:11px;font-weight:800;color:var(--success)}
+.inline-alert{display:none;background:#fff4f2;border:1px solid #f3c6bf;color:#7b2d21;border-radius:4px;padding:12px;margin-bottom:12px}.inline-alert.show{display:block}.inline-alert strong{display:block;font-size:13px;margin-bottom:4px}.inline-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.shipping-note{font-size:12px;color:var(--muted);margin:-6px 0 12px}
+.ship-option{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:start;padding:14px 12px;border:1px solid var(--border);border-top:none;background:#fff;cursor:pointer}.ship-option:first-of-type{border-top:1px solid var(--border);border-top-left-radius:4px;border-top-right-radius:4px}.ship-option:last-of-type{border-bottom-left-radius:4px;border-bottom-right-radius:4px}.ship-option.active{background:#fbfdff;box-shadow:inset 0 0 0 1px var(--cyan)}
+.ship-title{font-size:14px;font-weight:700}.ship-eta{font-size:13px;font-weight:800;margin-top:2px;color:var(--navy)}.ship-cutoff{font-size:12px;color:var(--muted);margin-top:2px}.ship-price{font-size:14px;font-weight:800;white-space:nowrap}.ship-price.free{color:var(--success)}
+.pay-list .pay-row{display:grid;grid-template-columns:22px 28px 1fr;gap:10px;align-items:center;padding:14px 16px;border-top:1px solid var(--border);font-size:14px;font-weight:700;background:#fff}.pay-list .pay-row:first-child{border-top:none}.pay-list .pay-row.saved{background:#fbfcfd}.pay-sub{font-size:12px;color:var(--muted);font-weight:600}
+.accordion{display:flex;justify-content:space-between;align-items:center;height:48px;padding:0 14px;border:1px solid var(--border);border-radius:4px;background:#fff;margin-top:12px;font-weight:700;color:#243042}
+.summary-card{padding:16px;border:1px solid var(--border);border-radius:4px;background:#fff;margin-top:14px}.summary-line{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:10px}.summary-line:last-child{margin-bottom:0}.summary-total{padding-top:10px;border-top:1px solid var(--border);font-size:16px;font-weight:800;color:var(--navy)}
+.place-order{margin-top:14px;width:100%;height:48px;border:none;border-radius:4px;background:var(--navy);color:#fff;font-size:13px;font-weight:800;cursor:pointer}.disclaimer{font-size:12px;color:var(--muted);margin-top:12px;line-height:1.5}
+.delivery-only,.collect-only{display:none}.delivery-mode .delivery-only{display:block}.collect-mode .collect-only{display:block}.collect-mode #shipping-options-section{display:none}
+.saved-payment-note{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:8px;margin-bottom:14px}.saved-payment-note svg{width:14px;height:14px}
+.store-card{border:1px solid var(--border);border-radius:4px;padding:12px;background:#fff}.store-card strong{display:block;font-size:13px;margin-bottom:4px;color:var(--navy)}.store-card span{display:block;font-size:12px;color:var(--muted)}
+.checkout-col .section,.summary-col .section,.bag-col .section{scroll-margin-top:110px}
+@media (max-width:1180px){.checkout-grid{grid-template-columns:1fr}.summary-col{order:3}.bag-col{order:1}.checkout-col{order:2}}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <img class="logo" src="https://www.jaycar.com.au/_next/static/media/jaycar-logo.a95c232b.svg" alt="Jaycar">
+  <div class="header-icons">
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Account</span></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path><rect x="9" y="3" width="6" height="4" rx="1"></rect></svg><span>My Lists</span></div>
+    <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg><span>Cart</span></div>
+  </div>
+</header>
+<nav class="progress-bar" aria-label="Checkout steps">
+  <div class="p-step done"><div class="p-num">✓</div>Cart</div><div class="p-div"></div>
+  <div class="p-step active"><div class="p-num">2</div>Checkout</div><div class="p-div"></div>
+  <div class="p-step"><div class="p-num">3</div>Confirmation</div>
+</nav>
+<div class="checkout-wrap">
+  <div class="checkout-grid">
+    <section class="bag-col">
+      <h1 class="checkout-title" style="margin-bottom:8px">Bag (3)</h1>
+      <div class="small-note">Items in your bag will only be reserved after the order is placed.</div>
+      <div class="section"><div class="bag-card-head"><h3 style="margin-bottom:0">Fulfilment review</h3><span class="badge badge-orange">1 item needs review</span></div><div class="review-alert"><strong>Basket needs attention</strong><span>Your clearance speaker may not be available for every delivery address. Review the address below or switch to Click &amp; Collect.</span></div></div>
+      <div class="panel panel-pad">
+        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/SB2486%202.png" alt="XC5262"></div><div><div class="bag-name">2in1 Portable Split Wireless Speakers 10W</div><div class="bag-sub">XC5262</div><div class="bag-price">$44.95</div><div class="bag-meta">Clearance item · Delivery availability can vary by address</div><div class="bag-links"><span>Move to Wishlist</span><span>Remove</span></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div><div class="low-stock">ⓘ Limited fulfilment availability</div></div></div>
+        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/TL6412_elegoo-pla-filament-space-grey-1-75mm-1kg_161650.webp" alt="NS3005"></div><div><div class="bag-name">0.71mm Duratech Solder 200gm</div><div class="bag-sub">NS3005</div><div class="bag-price">$29.95</div><div class="bag-meta">Standard stocked line</div><div class="bag-links"><span>Move to Wishlist</span><span>Remove</span></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div></div></div>
+        <div class="bag-item"><div class="bag-thumb"><img src="https://raw.githubusercontent.com/RiccoZorzo/jaycar-checkout/main/images/images/MB3866_5000mah-magnetic-wireless-charging-power-bank_158002.webp" alt="MB3866"></div><div><div class="bag-name">5000mAh Magnetic Wireless Power Bank</div><div class="bag-sub">MB3866</div><div class="bag-price">$39.95</div><div class="bag-meta">Battery item</div><div class="bag-links"><span>Move to Wishlist</span><span>Remove</span></div><div class="bag-actions"><div class="field-sm"><label>Qty</label><select class="select-sm"><option>1</option></select></div></div></div></div>
+      </div>
+    </section>
+    <section class="checkout-col delivery-mode" id="checkout-mode-root">
+      <h2 class="checkout-title">Checkout</h2>
+      <div class="section">
+        <h3>Shipping address</h3>
+        <div class="panel">
+          <div class="toggle"><button id="tab-delivery" class="active" onclick="switchFulfilment('delivery')">Delivery</button><button id="tab-collect" onclick="switchFulfilment('collect')">Collection point</button></div>
+          <div class="panel-pad">
+            <div class="account-strip"><div><strong>Signed in as rezorzo@gmail.com</strong><br><span>Saved details and address book available</span></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-navy" type="button">Manage account</button><button class="btn btn-ghost" type="button">Guest checkout</button></div></div>
+            <div class="delivery-only" id="saved-address-section"><div class="form-label" style="margin-bottom:8px">Saved addresses</div><div class="inline-alert" id="address-alert"><strong>This address can’t receive 1 clearance item in your basket.</strong>Choose another saved address, switch to Click &amp; Collect, or remove the affected item.<div class="inline-actions"><button class="btn btn-navy" type="button" onclick="switchFulfilment('collect')">Switch to Click &amp; Collect</button><button class="btn btn-ghost" type="button">Remove affected item</button></div></div><div class="saved-addresses" id="saved-addresses"></div><button class="btn btn-ghost" type="button">+ Add new address</button><div style="height:12px"></div></div>
+            <div class="form-grid-2"><div class="form-group"><label class="form-label">First name *</label><input class="input" id="first-name" value="Riccardo"></div><div class="form-group"><label class="form-label">Last name *</label><input class="input" id="last-name" value="Zorzo"></div></div>
+            <div class="form-group delivery-only"><label class="form-label">Business name <span class="opt">optional</span></label><input class="input" placeholder=""></div>
+            <div class="form-group delivery-only"><label class="form-label">Shipping address *</label><input class="input" id="shipping-address" value="45 Pearl St, Newtown, NSW 2042"></div>
+            <div class="collect-only"><div class="store-card"><strong>Jaycar Wetherill Park</strong><span>1/7 Foundry Rd, Wetherill Park NSW 2164</span><span>Ready within 2 hours · Mon–Fri 8am–5:30pm</span></div><div style="height:12px"></div></div>
+            <div class="form-group"><label class="form-label">Mobile number *</label><div class="inline-phone"><select class="select"><option>AU</option></select><input class="input" id="mobile" value="+6143491006"></div></div>
+          </div>
+        </div>
+      </div>
+      <div class="section delivery-only" id="shipping-options-section"><h3>Shipping options</h3><div class="shipping-note">Delivery options adjusted for this basket and selected address.</div>
+        <label class="ship-option" data-service="express"><input type="radio" name="ship-speed" onchange="selectShipService('express')"><div><div class="ship-title">Express delivery</div><div class="ship-eta">Tomorrow (9am - 5pm)</div><div class="ship-cutoff">If ordered before 2:00pm Sydney time</div></div><div class="ship-price">$14.95</div></label>
+        <label class="ship-option active" data-service="standard"><input type="radio" name="ship-speed" checked onchange="selectShipService('standard')"><div><div class="ship-title">Standard delivery</div><div class="ship-eta">By Thu, 23 Apr (9am - 5pm)</div><div class="ship-cutoff">Free over $149, otherwise $9.95</div></div><div class="ship-price free" id="standard-price-label">FREE</div></label>
+      </div>
+    </section>
+    <aside class="summary-col">
+      <h2 class="checkout-title">Payment</h2>
+      <div class="section"><h3>Pay by</h3><div class="saved-payment-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>All transactions are secure and encrypted.</div><div class="panel pay-list"><div class="pay-row saved"><input type="radio" checked><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path></svg><div>Saved<div class="pay-sub">Visa •••• 3054</div></div></div><div class="pay-row"><input type="radio"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18"></path></svg><div>Card</div></div><div class="pay-row"><input type="radio"><span style="font-weight:900;color:#0070ba">P</span><div>PayPal</div></div><div class="pay-row"><input type="radio"><span style="font-weight:900;color:#0070ba">P</span><div>PayPal Pay In 4</div></div><div class="pay-row"><input type="radio"><span style="font-size:11px;font-weight:900;border:1px solid #ccc;padding:1px 4px;border-radius:12px">GPay</span><div>Google Pay</div></div><div class="pay-row"><input type="radio"><span style="font-weight:900">A</span><div>Afterpay</div></div></div><div class="accordion"><span>Use a gift card</span><span>⌄</span></div></div>
+      <div class="section"><h3>Apply a voucher</h3><div class="accordion"><span>Add a voucher code</span><span>⌄</span></div></div>
+      <div class="summary-card"><h3 style="margin-bottom:16px;color:var(--navy)">Summary</h3><div class="summary-line"><span>Subtotal - 3 items</span><strong id="sum-subtotal">$114.85</strong></div><div class="summary-line"><span>Shipping</span><strong id="sum-shipping" style="color:var(--success)">FREE</strong></div><div class="summary-line"><span>Returns</span><strong style="color:var(--success)">FREE FOR 30 DAYS*</strong></div><div class="summary-line summary-total"><span>Total</span><strong id="sum-total">$114.85</strong></div></div>
+      <div class="disclaimer">Check your bag for items that cannot be returned unless faulty due to the applied discount.</div><button class="place-order">PLACE YOUR ORDER</button>
+    </aside>
+  </div>
+</div>
+<script>
+const state={fulfilment:'delivery',service:'standard',selectedAddressId:'home',subtotal:114.85,addresses:[{id:'home',label:'Home',line:'45 Pearl St, Newtown, NSW 2042',phone:'0434491006',valid:false},{id:'work',label:'Work',line:'12 Foundry Rd, Wetherill Park, NSW 2164',phone:'0434491006',valid:true},{id:'parents',label:'Parents',line:'88 Sample Ave, Blacktown, NSW 2148',phone:'0400000000',valid:true}]};
+function money(v){return '$'+v.toFixed(2)}
+function currentAddress(){return state.addresses.find(a=>a.id===state.selectedAddressId)}
+function renderAddresses(){document.getElementById('saved-addresses').innerHTML=state.addresses.map(a=>`<label class="addr-card ${a.id===state.selectedAddressId?'active':''}" onclick="selectAddress('${a.id}')"><input type="radio" name="saved-address" ${a.id===state.selectedAddressId?'checked':''}><div><div class="addr-title">${a.label}</div><div class="addr-copy">${a.line}<br>${a.phone}</div></div><div class="addr-tag">${a.valid?'Delivery available':'Review needed'}</div></label>`).join('')}
+function selectAddress(id){state.selectedAddressId=id;renderAddresses();updateAddressFields();revalidateAddress()}
+function updateAddressFields(){const a=currentAddress();document.getElementById('shipping-address').value=a.line;document.getElementById('mobile').value='+61'+a.phone.replace(/^0/,'')}
+function revalidateAddress(){const valid=currentAddress().valid;document.getElementById('address-alert').classList.toggle('show',state.fulfilment==='delivery'&&!valid);document.querySelectorAll('[data-service]').forEach(el=>{el.style.opacity=valid?'1':'.55';el.style.pointerEvents=valid?'auto':'none'});updateSummary()}
+function switchFulfilment(mode){state.fulfilment=mode;const root=document.getElementById('checkout-mode-root');root.classList.toggle('delivery-mode',mode==='delivery');root.classList.toggle('collect-mode',mode==='collect');document.getElementById('tab-delivery').classList.toggle('active',mode==='delivery');document.getElementById('tab-collect').classList.toggle('active',mode==='collect');updateSummary();revalidateAddress()}
+function selectShipService(service){state.service=service;document.querySelectorAll('[data-service]').forEach(el=>{const active=el.getAttribute('data-service')===service;el.classList.toggle('active',active);const radio=el.querySelector('input');if(radio)radio.checked=active});updateSummary()}
+function shippingCharge(){if(state.fulfilment==='collect')return 0;if(!currentAddress().valid)return null;if(state.service==='express')return 14.95;return state.subtotal>=149?0:9.95}
+function updateSummary(){const shipping=shippingCharge(),shipEl=document.getElementById('sum-shipping'),totalEl=document.getElementById('sum-total');if(shipping===null){shipEl.textContent='Address needs review';shipEl.style.color='#CF0B2A';totalEl.textContent='—'}else if(shipping===0){shipEl.textContent='FREE';shipEl.style.color='#1f9d55';totalEl.textContent=money(state.subtotal)}else{shipEl.textContent=money(shipping);shipEl.style.color='#1f2937';totalEl.textContent=money(state.subtotal+shipping)}const standardLabel=document.getElementById('standard-price-label');standardLabel.textContent=state.subtotal>=149?'FREE':'$9.95';standardLabel.classList.toggle('free',state.subtotal>=149)}
+renderAddresses();updateAddressFields();switchFulfilment('delivery');selectShipService('standard');
+</script>
+</body>
+</html>
